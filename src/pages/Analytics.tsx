@@ -1,0 +1,50 @@
+import React, { useState } from 'react';
+import { useMachineStore } from '../store/machineStore';
+import { KPIGrid } from '../components/analytics/KPIGrid';
+import { UtilizationChart } from '../components/analytics/UtilizationChart';
+import { DowntimeChart } from '../components/analytics/DowntimeChart';
+import { PerformanceRanking } from '../components/analytics/PerformanceRanking';
+import { Tabs } from '../components/ui/Tabs';
+
+export const AnalyticsPage: React.FC = () => {
+  const machines = useMachineStore((s) => s.machines);
+  const [periodTrend, setPeriodTrend] = useState<string>('Daily');
+
+  const periodTabs = [
+    { id: 'Daily', label: 'Daily Trend' },
+    { id: 'Weekly', label: 'Weekly Trend' },
+    { id: 'Monthly', label: 'Monthly Trend' }
+  ];
+
+  return (
+    <div className="space-y-6">
+      {/* Top Header & Trend Toggle */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-surface border border-surface-border p-4 rounded-xl shadow-subtle">
+        <div>
+          <h2 className="text-xl font-extrabold text-txt-primary tracking-tight">OEE & Analytics Intelligence</h2>
+          <p className="text-xs text-txt-secondary font-mono">
+            Plant-wide equipment efficiency, downtime loss breakdown, and asset benchmarks
+          </p>
+        </div>
+
+        <Tabs
+          tabs={periodTabs}
+          activeTab={periodTrend}
+          onChange={setPeriodTrend}
+        />
+      </div>
+
+      {/* Top OEE KPI Cards Grid */}
+      <KPIGrid />
+
+      {/* Charts Grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <UtilizationChart machines={machines} />
+        <DowntimeChart />
+      </div>
+
+      {/* Performance Ranking */}
+      <PerformanceRanking machines={machines} />
+    </div>
+  );
+};

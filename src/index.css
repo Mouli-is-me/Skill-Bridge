@@ -1,0 +1,142 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --bg-primary: #F7F8F6;
+    --bg-secondary: #EEF1EE;
+    --bg-tertiary: #E5E9E6;
+    
+    --surface: #FFFFFF;
+    --surface-hover: #F2F5F3;
+    --surface-active: #E8ECE9;
+    --border-color: #E1E5E2;
+    
+    --text-primary: #1F2521;
+    --text-secondary: #66706A;
+    --text-muted: #8E9993;
+    
+    --accent: #1B6B48;
+    --accent-hover: #145338;
+    --accent-subtle: rgba(27, 107, 72, 0.08);
+    
+    --status-healthy: #16A34A;
+    --status-healthy-bg: #F0FDF4;
+    --status-healthy-border: #BBF7D0;
+    
+    --status-warning: #D97706;
+    --status-warning-bg: #FFFBEB;
+    --status-warning-border: #FDE68A;
+    
+    --status-fault: #DC2626;
+    --status-fault-bg: #FEF2F2;
+    --status-fault-border: #FECACA;
+    
+    --status-offline: #6B7280;
+    --status-offline-bg: #F3F4F6;
+    --status-offline-border: #E5E7EB;
+
+    --status-running: #16A34A;
+    --status-running-bg: #F0FDF4;
+    --status-error: #DC2626;
+    --status-error-bg: #FEF2F2;
+    --status-idle: #6B7280;
+    --status-idle-bg: #F3F4F6;
+    --status-info: #2563EB;
+    --status-info-bg: #EFF6FF;
+  }
+
+  .dark {
+    --bg-primary: #111412;
+    --bg-secondary: #151916;
+    --bg-tertiary: #1D221F;
+    
+    --surface: #181C19;
+    --surface-hover: #202622;
+    --surface-active: #29302B;
+    --border-color: #292E2B;
+    
+    --text-primary: #E8ECE9;
+    --text-secondary: #929B95;
+    --text-muted: #6A746D;
+    
+    --accent: #22C55E;
+    --accent-hover: #16A34A;
+    --accent-subtle: rgba(34, 197, 94, 0.12);
+    
+    --status-healthy: #22C55E;
+    --status-healthy-bg: rgba(34, 197, 94, 0.12);
+    --status-healthy-border: rgba(34, 197, 94, 0.3);
+    
+    --status-warning: #F59E0B;
+    --status-warning-bg: rgba(245, 158, 11, 0.12);
+    --status-warning-border: rgba(245, 158, 11, 0.3);
+    
+    --status-fault: #EF4444;
+    --status-fault-bg: rgba(239, 68, 68, 0.12);
+    --status-fault-border: rgba(239, 68, 68, 0.3);
+    
+    --status-offline: #9CA3AF;
+    --status-offline-bg: rgba(156, 163, 175, 0.12);
+    --status-offline-border: rgba(156, 163, 175, 0.3);
+
+    --status-running: #22C55E;
+    --status-running-bg: rgba(34, 197, 94, 0.12);
+    --status-error: #EF4444;
+    --status-error-bg: rgba(239, 68, 68, 0.12);
+    --status-idle: #9CA3AF;
+    --status-idle-bg: rgba(156, 163, 175, 0.12);
+    --status-info: #60A5FA;
+    --status-info-bg: rgba(37, 99, 235, 0.12);
+  }
+}
+
+body {
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Custom scrollbars for clean industrial UI */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-primary);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border-color);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--text-muted);
+}
+
+/* Recharts styling */
+.recharts-default-tooltip {
+  background-color: var(--surface) !important;
+  border-color: var(--border-color) !important;
+  color: var(--text-primary) !important;
+  border-radius: 6px !important;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1) !important;
+  padding: 8px 12px !important;
+  font-size: 12px !important;
+}
+
+.recharts-tooltip-label {
+  color: var(--text-primary) !important;
+  font-weight: 600 !important;
+  margin-bottom: 4px !important;
+  font-size: 12px !important;
+}
+
+.recharts-tooltip-item {
+  color: var(--text-secondary) !important;
+  font-size: 11px !important;
+}
