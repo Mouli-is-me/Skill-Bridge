@@ -137,7 +137,7 @@ export const MachinesPage: React.FC = () => {
                   <th className="py-2.5 px-4 font-semibold">Machine ID</th>
                   <th className="py-2.5 px-4 font-semibold">Machine Name</th>
                   <th className="py-2.5 px-4 font-semibold">Status</th>
-                  <th className="py-2.5 px-4 font-semibold">Modules</th>
+                  <th className="py-2.5 px-4 font-semibold">Hardware Sensors</th>
                   <th className="py-2.5 px-4 font-semibold">Healthy</th>
                   <th className="py-2.5 px-4 font-semibold">Warnings</th>
                   <th className="py-2.5 px-4 font-semibold">Faults</th>

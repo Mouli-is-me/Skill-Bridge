@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { MachineModule } from '../../types/module';
 import { Badge } from '../ui/Badge';
 import { formatTimeAgo } from '../../utils/formatting';
-import { ArrowRight, Activity, Thermometer, Gauge, Zap, Wind } from 'lucide-react';
+import { ArrowRight, Activity, Thermometer, Radio, Cpu } from 'lucide-react';
 import { clsx } from 'clsx';
 
 interface MachineModuleCardProps {
@@ -28,18 +28,27 @@ export const MachineModuleCard: React.FC<MachineModuleCardProps> = ({ module, ma
 
   const getModuleIcon = () => {
     switch (module.type) {
-      case 'Motor':
-      case 'Spindle':
-        return <Gauge className="w-4 h-4 text-txt-secondary" />;
-      case 'Vibration':
+      case 'MPU6050':
         return <Activity className="w-4 h-4 text-txt-secondary" />;
-      case 'Temperature':
+      case 'DS18B20':
         return <Thermometer className="w-4 h-4 text-txt-secondary" />;
-      case 'Drive':
-      case 'Drafting':
-        return <Zap className="w-4 h-4 text-txt-secondary" />;
+      case 'LM393':
+        return <Radio className="w-4 h-4 text-txt-secondary" />;
       default:
-        return <Wind className="w-4 h-4 text-txt-secondary" />;
+        return <Cpu className="w-4 h-4 text-txt-secondary" />;
+    }
+  };
+
+  const getModuleDescription = () => {
+    switch (module.type) {
+      case 'MPU6050':
+        return '6-Axis Acceleration & Gyroscope';
+      case 'DS18B20':
+        return '1-Wire Digital Temperature';
+      case 'LM393':
+        return 'Opto-Pulse Comparator';
+      default:
+        return 'Hardware Sensor';
     }
   };
 
@@ -60,9 +69,14 @@ export const MachineModuleCard: React.FC<MachineModuleCardProps> = ({ module, ma
               {getModuleIcon()}
             </div>
             <div>
-              <h4 className="text-xs font-bold uppercase tracking-wider text-txt-primary">
-                {module.name}
-              </h4>
+              <div className="flex items-center gap-1.5">
+                <h4 className="text-sm font-bold font-mono uppercase tracking-wider text-txt-primary">
+                  {module.name}
+                </h4>
+                <span className="text-[10px] font-mono px-1 py-0.2 rounded bg-bg-tertiary text-txt-muted">
+                  HARDWARE
+                </span>
+              </div>
               <div className="text-[11px] font-mono text-txt-muted mt-0.5">
                 Module: <span className="font-semibold text-txt-secondary">{module.id}</span>
               </div>
@@ -74,9 +88,13 @@ export const MachineModuleCard: React.FC<MachineModuleCardProps> = ({ module, ma
           </Badge>
         </div>
 
+        <div className="text-[10px] font-mono text-txt-muted mt-2">
+          {getModuleDescription()}
+        </div>
+
         {/* Live Sensor Readings Table */}
-        <div className="py-3 space-y-2 font-mono text-xs">
-          {module.sensors.slice(0, 4).map((sensor) => {
+        <div className="py-2.5 space-y-1.5 font-mono text-xs">
+          {module.sensors.map((sensor) => {
             const isSensorWarn = sensor.status === 'WARNING';
             const isSensorFault = sensor.status === 'FAULT';
 
@@ -95,7 +113,11 @@ export const MachineModuleCard: React.FC<MachineModuleCardProps> = ({ module, ma
                   isSensorWarn ? "text-status-warning" :
                   "text-txt-primary"
                 )}>
-                  {sensor.value} {sensor.unit}
+                  {sensor.displayState ? (
+                    sensor.displayState
+                  ) : (
+                    `${sensor.value} ${sensor.unit}`
+                  )}
                 </span>
               </div>
             );

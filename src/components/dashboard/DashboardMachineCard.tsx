@@ -4,7 +4,7 @@ import { Machine } from '../../types/machine';
 import { Badge } from '../ui/Badge';
 import { getMachineModuleStats } from '../../utils/moduleHelpers';
 import { formatTimeAgo } from '../../utils/formatting';
-import { ArrowRight, Thermometer, Activity, Gauge, Zap } from 'lucide-react';
+import { ArrowRight, Thermometer, Activity, Radio } from 'lucide-react';
 import { clsx } from 'clsx';
 
 interface DashboardMachineCardProps {
@@ -29,6 +29,18 @@ export const DashboardMachineCard: React.FC<DashboardMachineCardProps> = ({ mach
     ? 'OFFLINE' 
     : 'HEALTHY';
 
+  // Extract the 3 physical sensor modules
+  const mpu = modules.find(m => m.type === 'MPU6050');
+  const ds18 = modules.find(m => m.type === 'DS18B20');
+  const lm393 = modules.find(m => m.type === 'LM393');
+
+  const tempSensor = ds18?.sensors.find(s => s.key === 'temperature');
+  const accelXSensor = mpu?.sensors.find(s => s.key === 'accelX');
+  const accelYSensor = mpu?.sensors.find(s => s.key === 'accelY');
+  const accelZSensor = mpu?.sensors.find(s => s.key === 'accelZ');
+  const pulseFreqSensor = lm393?.sensors.find(s => s.key === 'pulseFrequency');
+  const detectionSensor = lm393?.sensors.find(s => s.key === 'detectionState');
+
   return (
     <div
       className={clsx(
@@ -38,8 +50,8 @@ export const DashboardMachineCard: React.FC<DashboardMachineCardProps> = ({ mach
         "border-surface-border"
       )}
     >
-      {/* Top row: ID, Name, Status */}
       <div>
+        {/* Machine ID, Name & Status */}
         <div className="flex items-start justify-between gap-2">
           <div>
             <div className="flex items-center gap-2">
@@ -60,9 +72,9 @@ export const DashboardMachineCard: React.FC<DashboardMachineCardProps> = ({ mach
           </Badge>
         </div>
 
-        {/* Module Health Summary */}
+        {/* 3 Hardware Sensors Strip */}
         <div className="mt-3 py-1.5 px-2.5 rounded bg-bg-primary/70 border border-surface-border/50 flex items-center justify-between text-xs font-mono">
-          <span className="text-txt-secondary text-[11px]">Modules</span>
+          <span className="text-txt-secondary text-[11px]">3 Physical Sensors</span>
           <span className={clsx(
             "font-bold text-[11px]",
             isFault ? "text-status-fault" : isWarning ? "text-status-warning" : "text-status-healthy"
@@ -71,34 +83,47 @@ export const DashboardMachineCard: React.FC<DashboardMachineCardProps> = ({ mach
           </span>
         </div>
 
-        {/* Live Telemetry Preview Chips */}
-        <div className="grid grid-cols-2 gap-2 mt-3 text-xs font-mono">
-          <div className="flex items-center gap-1.5 text-txt-secondary">
-            <Thermometer className="w-3.5 h-3.5 text-txt-muted shrink-0" />
-            <span className={machine.metrics.temperature >= machine.thresholds.tempWarning ? "text-status-warning font-bold" : "text-txt-primary"}>
-              {machine.metrics.temperature.toFixed(1)} °C
+        {/* Real Hardware Sensor Telemetry Preview */}
+        <div className="mt-3 space-y-2 font-mono text-xs">
+          {/* DS18B20 */}
+          <div className="flex items-center justify-between py-1 px-1.5 rounded bg-bg-primary/40 border border-surface-border/40">
+            <div className="flex items-center gap-1.5 text-txt-secondary">
+              <Thermometer className="w-3.5 h-3.5 text-txt-muted shrink-0" />
+              <span className="text-[11px] font-bold">DS18B20</span>
+            </div>
+            <span className={clsx(
+              "font-bold text-[11px]",
+              (tempSensor?.value || 0) >= (tempSensor?.warningThreshold || 75) ? "text-status-warning" : "text-txt-primary"
+            )}>
+              {tempSensor?.value.toFixed(1)} °C
             </span>
           </div>
 
-          <div className="flex items-center gap-1.5 text-txt-secondary">
-            <Activity className="w-3.5 h-3.5 text-txt-muted shrink-0" />
-            <span className={machine.metrics.vibration >= machine.thresholds.vibWarning ? "text-status-warning font-bold" : "text-txt-primary"}>
-              {machine.metrics.vibration.toFixed(2)} mm/s
-            </span>
+          {/* MPU6050 */}
+          <div className="flex items-center justify-between py-1 px-1.5 rounded bg-bg-primary/40 border border-surface-border/40">
+            <div className="flex items-center gap-1.5 text-txt-secondary">
+              <Activity className="w-3.5 h-3.5 text-txt-muted shrink-0" />
+              <span className="text-[11px] font-bold">MPU6050</span>
+            </div>
+            <div className="text-[11px] text-right font-medium">
+              <span className={(accelXSensor?.value || 0) >= (accelXSensor?.warningThreshold || 2.0) ? "text-status-warning font-bold" : "text-txt-primary"}>
+                X:{accelXSensor?.value.toFixed(2)} Y:{accelYSensor?.value.toFixed(2)} g
+              </span>
+            </div>
           </div>
 
-          <div className="flex items-center gap-1.5 text-txt-secondary">
-            <Gauge className="w-3.5 h-3.5 text-txt-muted shrink-0" />
-            <span className="text-txt-primary">
-              {machine.metrics.rpm} RPM
-            </span>
-          </div>
-
-          <div className="flex items-center gap-1.5 text-txt-secondary">
-            <Zap className="w-3.5 h-3.5 text-txt-muted shrink-0" />
-            <span className="text-txt-primary">
-              {machine.metrics.current.toFixed(1)} A
-            </span>
+          {/* LM393 */}
+          <div className="flex items-center justify-between py-1 px-1.5 rounded bg-bg-primary/40 border border-surface-border/40">
+            <div className="flex items-center gap-1.5 text-txt-secondary">
+              <Radio className="w-3.5 h-3.5 text-txt-muted shrink-0" />
+              <span className="text-[11px] font-bold">LM393</span>
+            </div>
+            <div className="text-[11px] text-right font-medium text-txt-primary">
+              <span className="text-txt-muted text-[10px] mr-1">
+                {detectionSensor?.displayState || (detectionSensor?.value === 1 ? 'Detected' : 'Clear')}
+              </span>
+              <span>{pulseFreqSensor?.value.toFixed(1)} Hz</span>
+            </div>
           </div>
         </div>
       </div>

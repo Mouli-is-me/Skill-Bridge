@@ -16,6 +16,7 @@ import {
   Radio,
   Sliders,
   TrendingUp,
+  Thermometer,
   Cpu
 } from 'lucide-react';
 import {
@@ -53,7 +54,7 @@ export const ModuleDetailPage: React.FC = () => {
 
   // Active parameter selected for Live Chart
   const [selectedSensorKey, setSelectedSensorKey] = useState<string>(
-    targetModule.config.primarySensorKey || targetModule.sensors[0]?.key || 'temperature'
+    targetModule.config.primarySensorKey || targetModule.sensors[0]?.key || 'accelX'
   );
 
   // Management Form State
@@ -89,9 +90,9 @@ export const ModuleDetailPage: React.FC = () => {
   // Find currently active sensor
   const activeSensor = targetModule.sensors.find((s) => s.key === selectedSensorKey) || targetModule.sensors[0];
 
-  // Build live chart history buffer from sensor's recent points or synthetic buffer
+  // Build live chart history buffer from sensor's recent points
   const chartData = useMemo(() => {
-    const baseVal = activeSensor ? activeSensor.value : 50;
+    const baseVal = activeSensor ? activeSensor.value : 10;
     const history = activeSensor?.history || [baseVal * 0.98, baseVal * 0.99, baseVal];
     
     return history.map((val, idx) => {
@@ -99,8 +100,8 @@ export const ModuleDetailPage: React.FC = () => {
       return {
         time: secOffset === 0 ? 'Now' : `-${secOffset}s`,
         value: Number(val.toFixed(2)),
-        warning: warningThreshold,
-        critical: criticalThreshold
+        warning: warningThreshold > 0 ? warningThreshold : undefined,
+        critical: criticalThreshold > 0 ? criticalThreshold : undefined
       };
     });
   }, [activeSensor?.value, activeSensor?.history, samplingRate, warningThreshold, criticalThreshold]);
@@ -135,14 +136,20 @@ export const ModuleDetailPage: React.FC = () => {
     ? 'OFFLINE' 
     : 'NORMAL';
 
-  // Condition message
+  // Condition message based on real sensor
   const conditionMessage = isFault
-    ? `Critical limit exceeded: ${activeSensor?.name || 'Sensor'} is at ${activeSensor?.value} ${activeSensor?.unit} (Critical Threshold: ${criticalThreshold} ${activeSensor?.unit})`
+    ? `Critical threshold exceeded: ${activeSensor?.name || 'Sensor'} is at ${activeSensor?.value} ${activeSensor?.unit} (Critical Limit: ${criticalThreshold} ${activeSensor?.unit})`
     : isWarning
-    ? `Warning threshold exceeded: ${activeSensor?.name || 'Sensor'} is approaching critical limits at ${activeSensor?.value} ${activeSensor?.unit} (Warning Threshold: ${warningThreshold} ${activeSensor?.unit})`
+    ? `Warning threshold exceeded: ${activeSensor?.name || 'Sensor'} is approaching critical limits at ${activeSensor?.value} ${activeSensor?.unit} (Warning Limit: ${warningThreshold} ${activeSensor?.unit})`
     : isOffline
-    ? 'Module is disabled or offline. Telemetry acquisition halted.'
-    : 'Operating normally within configured limits.';
+    ? 'Hardware sensor channel disabled or disconnected.'
+    : 'Physical sensor operating normally within configured limits.';
+
+  const getSensorBadgeIcon = () => {
+    if (targetModule.type === 'MPU6050') return <Activity className="w-4 h-4 text-txt-secondary" />;
+    if (targetModule.type === 'DS18B20') return <Thermometer className="w-4 h-4 text-txt-secondary" />;
+    return <Radio className="w-4 h-4 text-txt-secondary" />;
+  };
 
   return (
     <div className="space-y-6">
@@ -155,12 +162,12 @@ export const ModuleDetailPage: React.FC = () => {
         <span>← {targetMachine.id} / Modules</span>
       </button>
 
-      {/* Header: Module Identity & Real-Time Status */}
+      {/* Header: Hardware Sensor Identity & Status */}
       <div className="bg-surface border border-surface-border p-4 rounded-lg shadow-subtle flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <div className="flex items-center gap-2">
             <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-bg-primary text-txt-muted border border-surface-border uppercase font-semibold">
-              {targetModule.type} MODULE
+              PHYSICAL HARDWARE SENSOR
             </span>
             <span className="text-txt-muted text-xs font-mono">•</span>
             <span className="text-xs font-mono text-txt-secondary">
@@ -169,7 +176,10 @@ export const ModuleDetailPage: React.FC = () => {
           </div>
 
           <div className="flex items-center gap-3 mt-1.5">
-            <h2 className="text-xl font-bold text-txt-primary tracking-tight font-sans">
+            <div className="p-1 rounded bg-bg-primary border border-surface-border">
+              {getSensorBadgeIcon()}
+            </div>
+            <h2 className="text-xl font-bold text-txt-primary tracking-tight font-mono">
               {targetModule.name}
             </h2>
             <Badge status={statusLabel} size="sm">
@@ -178,7 +188,7 @@ export const ModuleDetailPage: React.FC = () => {
           </div>
 
           <div className="text-xs font-mono text-txt-muted mt-1">
-            Module ID: <strong className="text-txt-primary">{targetModule.id}</strong>
+            Sensor ID: <strong className="text-txt-primary">{targetModule.id}</strong>
           </div>
         </div>
 
@@ -201,14 +211,14 @@ export const ModuleDetailPage: React.FC = () => {
       <div className="space-y-3">
         <div className="flex items-center justify-between">
           <h3 className="text-sm font-bold text-txt-primary uppercase font-mono tracking-wider">
-            LIVE SENSOR DATA
+            LIVE SENSOR DATA ({targetModule.name})
           </h3>
           <span className="text-xs font-mono text-txt-muted">
-            {targetModule.sensors.length} Active Channels
+            {targetModule.sensors.length} Monitored Channel{targetModule.sensors.length > 1 ? 's' : ''}
           </span>
         </div>
 
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
           {targetModule.sensors.map((sensor) => {
             const isWarn = sensor.status === 'WARNING';
             const isFlt = sensor.status === 'FAULT';
@@ -241,14 +251,22 @@ export const ModuleDetailPage: React.FC = () => {
                     "text-xl sm:text-2xl font-mono font-bold tracking-tight block",
                     isFlt ? "text-status-fault" : isWarn ? "text-status-warning" : "text-txt-primary"
                   )}>
-                    {sensor.value} <span className="text-xs font-normal text-txt-secondary">{sensor.unit}</span>
+                    {sensor.displayState ? (
+                      sensor.displayState
+                    ) : (
+                      <>
+                        {sensor.value} <span className="text-xs font-normal text-txt-secondary">{sensor.unit}</span>
+                      </>
+                    )}
                   </span>
                 </div>
 
-                <div className="mt-1.5 pt-1.5 border-t border-surface-border/50 text-[10px] font-mono text-txt-muted flex justify-between">
-                  <span>Warn: {sensor.warningThreshold}</span>
-                  <span>Crit: {sensor.criticalThreshold}</span>
-                </div>
+                {sensor.warningThreshold > 0 && (
+                  <div className="mt-1.5 pt-1.5 border-t border-surface-border/50 text-[10px] font-mono text-txt-muted flex justify-between">
+                    <span>Warn: {sensor.warningThreshold}</span>
+                    <span>Crit: {sensor.criticalThreshold}</span>
+                  </div>
+                )}
               </div>
             );
           })}
@@ -266,7 +284,7 @@ export const ModuleDetailPage: React.FC = () => {
               </h3>
             </div>
             <p className="text-xs font-mono text-txt-muted mt-0.5">
-              Live continuous stream ({samplingRate}s interval)
+              Physical hardware telemetry stream ({samplingRate}s interval)
             </p>
           </div>
 
@@ -319,18 +337,22 @@ export const ModuleDetailPage: React.FC = () => {
                 }}
               />
               {/* Threshold indicator lines */}
-              <ReferenceLine
-                y={warningThreshold}
-                stroke="var(--status-warning)"
-                strokeDasharray="4 4"
-                label={{ value: `Warn (${warningThreshold})`, fill: 'var(--status-warning)', fontSize: 10, position: 'right' }}
-              />
-              <ReferenceLine
-                y={criticalThreshold}
-                stroke="var(--status-fault)"
-                strokeDasharray="4 4"
-                label={{ value: `Crit (${criticalThreshold})`, fill: 'var(--status-fault)', fontSize: 10, position: 'right' }}
-              />
+              {warningThreshold > 0 && (
+                <ReferenceLine
+                  y={warningThreshold}
+                  stroke="var(--status-warning)"
+                  strokeDasharray="4 4"
+                  label={{ value: `Warn (${warningThreshold})`, fill: 'var(--status-warning)', fontSize: 10, position: 'right' }}
+                />
+              )}
+              {criticalThreshold > 0 && (
+                <ReferenceLine
+                  y={criticalThreshold}
+                  stroke="var(--status-fault)"
+                  strokeDasharray="4 4"
+                  label={{ value: `Crit (${criticalThreshold})`, fill: 'var(--status-fault)', fontSize: 10, position: 'right' }}
+                />
+              )}
               <Line
                 type="monotone"
                 dataKey="value"
@@ -349,7 +371,7 @@ export const ModuleDetailPage: React.FC = () => {
       <div className="bg-surface border border-surface-border rounded-lg p-4 shadow-subtle space-y-2">
         <div className="flex items-center justify-between border-b border-surface-border/60 pb-2.5">
           <h3 className="text-sm font-bold text-txt-primary uppercase font-mono tracking-wider">
-            MODULE STATUS
+            SENSOR HEALTH STATUS
           </h3>
           <Badge status={statusLabel} size="md">
             ● {statusLabel}
@@ -377,11 +399,11 @@ export const ModuleDetailPage: React.FC = () => {
           <div className="flex items-center gap-2">
             <Sliders className="w-4 h-4 text-txt-secondary" />
             <h3 className="text-sm font-bold text-txt-primary uppercase font-mono tracking-wider">
-              MODULE MANAGEMENT
+              HARDWARE SENSOR CONFIGURATION
             </h3>
           </div>
           <span className="text-xs font-mono text-txt-muted">
-            Operational Parameter Controls
+            {targetModule.name} Module Settings
           </span>
         </div>
 
@@ -389,7 +411,7 @@ export const ModuleDetailPage: React.FC = () => {
         {saveSuccess && (
           <div className="bg-status-healthy-bg border border-status-healthy-border text-status-healthy px-3.5 py-2 rounded text-xs font-mono flex items-center gap-2">
             <Check className="w-4 h-4" />
-            <span>Module parameters updated and saved successfully!</span>
+            <span>Hardware sensor settings saved and updated in telemetry pipeline!</span>
           </div>
         )}
 
@@ -414,7 +436,7 @@ export const ModuleDetailPage: React.FC = () => {
           {/* Module Enabled Toggle */}
           <div className="space-y-1.5">
             <label className="text-txt-secondary font-semibold uppercase text-[11px] block">
-              Module State
+              Hardware Module State
             </label>
             <button
               type="button"
@@ -433,7 +455,7 @@ export const ModuleDetailPage: React.FC = () => {
           {/* Data Collection Toggle */}
           <div className="space-y-1.5">
             <label className="text-txt-secondary font-semibold uppercase text-[11px] block">
-              Data Collection
+              Telemetry Acquisition
             </label>
             <button
               type="button"
@@ -445,18 +467,18 @@ export const ModuleDetailPage: React.FC = () => {
                   : "bg-bg-primary text-txt-muted border-surface-border"
               )}
             >
-              {dataCollection ? 'Data Logging: ON' : 'Data Logging: OFF'}
+              {dataCollection ? 'Data Collection: ON' : 'Data Collection: OFF'}
             </button>
           </div>
 
-          {/* Thresholds Header / Warning */}
+          {/* Warning Threshold */}
           <div className="space-y-1.5">
             <label className="text-txt-secondary font-semibold uppercase text-[11px] block">
-              Warning Threshold ({activeSensor?.unit})
+              Warning Threshold {activeSensor?.unit ? `(${activeSensor.unit})` : ''}
             </label>
             <input
               type="number"
-              step="0.5"
+              step="0.1"
               value={warningThreshold}
               onChange={(e) => setWarningThreshold(Number(e.target.value))}
               className="w-full bg-bg-primary text-txt-primary border border-surface-border rounded px-3 py-2 text-xs font-mono focus:outline-none focus:ring-1 focus:ring-accent"
@@ -468,11 +490,11 @@ export const ModuleDetailPage: React.FC = () => {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 font-mono text-xs pt-1">
           <div className="space-y-1.5">
             <label className="text-txt-secondary font-semibold uppercase text-[11px] block">
-              Critical Threshold ({activeSensor?.unit})
+              Critical Threshold {activeSensor?.unit ? `(${activeSensor.unit})` : ''}
             </label>
             <input
               type="number"
-              step="0.5"
+              step="0.1"
               value={criticalThreshold}
               onChange={(e) => setCriticalThreshold(Number(e.target.value))}
               className="w-full bg-bg-primary text-txt-primary border border-surface-border rounded px-3 py-2 text-xs font-mono focus:outline-none focus:ring-1 focus:ring-accent"
@@ -487,7 +509,7 @@ export const ModuleDetailPage: React.FC = () => {
               icon={<Save className="w-4 h-4" />}
               className="w-full sm:w-auto font-mono text-xs"
             >
-              Save Changes
+              Save Hardware Settings
             </Button>
           </div>
         </div>

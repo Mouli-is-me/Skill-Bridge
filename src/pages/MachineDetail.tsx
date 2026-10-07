@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { useParams, useNavigate, Navigate } from 'react-router-dom';
 import { useMachineStore } from '../store/machineStore';
 import { MachineModuleCard } from '../components/machines/MachineModuleCard';
@@ -7,7 +7,7 @@ import { Badge } from '../components/ui/Badge';
 import { Button } from '../components/ui/Button';
 import { getMachineModuleStats } from '../utils/moduleHelpers';
 import { formatTimeAgo } from '../utils/formatting';
-import { ArrowLeft, RefreshCw, Cpu, Layers } from 'lucide-react';
+import { ArrowLeft, Cpu, Layers } from 'lucide-react';
 
 export const MachineDetailPage: React.FC = () => {
   const { machineId } = useParams<{ machineId: string }>();
@@ -68,7 +68,7 @@ export const MachineDetailPage: React.FC = () => {
 
           <div className="flex items-center gap-3 font-mono text-xs">
             <div className="bg-bg-primary px-3 py-1.5 rounded border border-surface-border text-center">
-              <span className="text-[10px] text-txt-muted block uppercase">Modules</span>
+              <span className="text-[10px] text-txt-muted block uppercase">Hardware Sensors</span>
               <span className="font-bold text-txt-primary">{stats.healthy} / {stats.total} Healthy</span>
             </div>
 
@@ -77,27 +77,27 @@ export const MachineDetailPage: React.FC = () => {
               variant="outline"
               onClick={() => navigate('/machines')}
             >
-              Fleet List
+              Fleet Directory
             </Button>
           </div>
         </div>
       </div>
 
-      {/* Primary Focus: MODULES Section */}
+      {/* Primary Focus: 3 PHYSICAL HARDWARE SENSORS */}
       <div className="space-y-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Layers className="w-4 h-4 text-txt-secondary" />
             <h3 className="text-sm font-bold text-txt-primary uppercase font-mono tracking-wider">
-              MODULES & SUB-SYSTEMS ({modules.length})
+              PHYSICAL HARDWARE SENSORS ({modules.length})
             </h3>
           </div>
           <span className="text-xs font-mono text-txt-muted">
-            Live telemetry updated continuously
+            MPU6050 • DS18B20 • LM393
           </span>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {modules.map((mod) => (
             <MachineModuleCard
               key={mod.id}
@@ -112,10 +112,10 @@ export const MachineDetailPage: React.FC = () => {
       <div className="space-y-3 pt-2">
         <div className="flex items-center justify-between">
           <h3 className="text-sm font-bold text-txt-primary uppercase font-mono tracking-wider">
-            MACHINE TELEMETRY TRENDS
+            HARDWARE TELEMETRY STREAM
           </h3>
           <span className="text-xs font-mono text-txt-muted">
-            High-frequency continuous stream
+            Continuous readings from DS18B20 & MPU6050
           </span>
         </div>
 

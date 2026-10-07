@@ -25,9 +25,9 @@ export const DashboardSummary: React.FC<DashboardSummaryProps> = ({ machines }) 
       border: 'border-surface-border'
     },
     {
-      label: 'Modules',
+      label: 'Hardware Sensors',
       value: totalModules,
-      subtext: 'Monitored Channels',
+      subtext: 'MPU6050 • DS18B20 • LM393',
       icon: Layers,
       color: 'text-txt-primary',
       bg: 'bg-bg-primary',

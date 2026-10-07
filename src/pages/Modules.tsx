@@ -4,7 +4,7 @@ import { useMachineStore } from '../store/machineStore';
 import { Badge } from '../components/ui/Badge';
 import { Select } from '../components/ui/Select';
 import { formatTimeAgo } from '../utils/formatting';
-import { Search, Layers, ArrowRight, Activity, Thermometer, Gauge, Zap } from 'lucide-react';
+import { Search, Layers, ArrowRight, Activity, Thermometer, Radio } from 'lucide-react';
 import { clsx } from 'clsx';
 
 export const ModulesPage: React.FC = () => {
@@ -51,14 +51,10 @@ export const ModulesPage: React.FC = () => {
   ];
 
   const typeOptions = [
-    { label: 'All Module Types', value: 'ALL' },
-    { label: 'Motor Drive', value: 'Motor' },
-    { label: 'Vibration Sensor', value: 'Vibration' },
-    { label: 'Thermal Sensor', value: 'Temperature' },
-    { label: 'Drive Unit', value: 'Drive' },
-    { label: 'Spindle Drive', value: 'Spindle' },
-    { label: 'Drafting System', value: 'Drafting' },
-    { label: 'Power Unit', value: 'Power' },
+    { label: 'All Hardware Sensors', value: 'ALL' },
+    { label: 'MPU6050 (Motion / Vibration)', value: 'MPU6050' },
+    { label: 'DS18B20 (Temperature)', value: 'DS18B20' },
+    { label: 'LM393 (Pulse / Detection)', value: 'LM393' },
   ];
 
   const statusOptions = [
@@ -69,16 +65,22 @@ export const ModulesPage: React.FC = () => {
     { label: 'OFFLINE', value: 'OFFLINE' },
   ];
 
+  const getSensorIcon = (type: string) => {
+    if (type === 'MPU6050') return <Activity className="w-3.5 h-3.5 text-txt-secondary" />;
+    if (type === 'DS18B20') return <Thermometer className="w-3.5 h-3.5 text-txt-secondary" />;
+    return <Radio className="w-3.5 h-3.5 text-txt-secondary" />;
+  };
+
   return (
     <div className="space-y-6">
       {/* Header and Filter Toolbar */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-surface border border-surface-border p-4 rounded-lg shadow-subtle">
         <div>
           <h2 className="text-base font-bold text-txt-primary tracking-tight font-mono">
-            MODULES DIRECTORY
+            HARDWARE SENSORS DIRECTORY
           </h2>
           <p className="text-xs text-txt-secondary font-mono">
-            {allModules.length} Modules & sub-assemblies across all fleet machines
+            {allModules.length} Physical sensor modules (MPU6050 • DS18B20 • LM393)
           </p>
         </div>
 
@@ -89,7 +91,7 @@ export const ModulesPage: React.FC = () => {
             <Search className="w-3.5 h-3.5 text-txt-muted absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
             <input
               type="text"
-              placeholder="Search module ID, machine..."
+              placeholder="Search sensor ID, machine..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="w-full bg-bg-primary text-txt-primary border border-surface-border rounded text-xs font-mono pl-8 pr-3 py-1.5 focus:outline-none focus:ring-1 focus:ring-accent"
@@ -120,12 +122,12 @@ export const ModulesPage: React.FC = () => {
       </div>
 
       <div className="flex items-center justify-between text-xs font-mono text-txt-muted">
-        <span>Showing {filteredModules.length} of {allModules.length} modules</span>
+        <span>Showing {filteredModules.length} of {allModules.length} physical sensors</span>
       </div>
 
       {filteredModules.length === 0 ? (
         <div className="bg-surface border border-surface-border rounded-lg p-10 text-center font-mono text-xs text-txt-muted">
-          No modules matched your search filters.
+          No hardware sensors matched your search filters.
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
@@ -146,7 +148,7 @@ export const ModulesPage: React.FC = () => {
                 )}
               >
                 <div>
-                  {/* Top Bar: Module Name & Status */}
+                  {/* Top Bar: Sensor Model & Status */}
                   <div className="flex items-start justify-between pb-2.5 border-b border-surface-border/60">
                     <div>
                       <div className="flex items-center gap-1.5 font-mono text-[11px] text-txt-muted">
@@ -154,9 +156,12 @@ export const ModulesPage: React.FC = () => {
                         <span>•</span>
                         <span>{mod.id}</span>
                       </div>
-                      <h4 className="text-xs font-bold text-txt-primary mt-0.5">
-                        {mod.name}
-                      </h4>
+                      <div className="flex items-center gap-1.5 mt-0.5">
+                        {getSensorIcon(mod.type)}
+                        <h4 className="text-sm font-bold font-mono text-txt-primary">
+                          {mod.name}
+                        </h4>
+                      </div>
                     </div>
 
                     <Badge status={statusLabel} size="sm">
@@ -164,9 +169,9 @@ export const ModulesPage: React.FC = () => {
                     </Badge>
                   </div>
 
-                  {/* Sensor preview list */}
+                  {/* Sensor channel preview list */}
                   <div className="py-2.5 space-y-1.5 font-mono text-xs">
-                    {mod.sensors.slice(0, 3).map((sensor) => (
+                    {mod.sensors.map((sensor) => (
                       <div key={sensor.id} className="flex justify-between py-0.5 text-[11px]">
                         <span className="text-txt-secondary truncate max-w-[130px]">{sensor.name}</span>
                         <span className={clsx(
@@ -174,7 +179,7 @@ export const ModulesPage: React.FC = () => {
                           sensor.status === 'FAULT' ? "text-status-fault" :
                           sensor.status === 'WARNING' ? "text-status-warning" : "text-txt-primary"
                         )}>
-                          {sensor.value} {sensor.unit}
+                          {sensor.displayState ? sensor.displayState : `${sensor.value} ${sensor.unit}`}
                         </span>
                       </div>
                     ))}
