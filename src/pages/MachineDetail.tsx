@@ -14,7 +14,8 @@ export const MachineDetailPage: React.FC = () => {
   const navigate = useNavigate();
   const { machines, historyMap } = useMachineStore();
 
-  const machine = machines.find((m) => m.id === (machineId || '').toUpperCase());
+  const paramClean = (machineId || '').replace('-', '').toUpperCase();
+  const machine = machines.find((m) => m.id.replace('-', '').toUpperCase() === paramClean);
 
   if (!machine) {
     return <Navigate to="/machines" replace />;
@@ -27,7 +28,9 @@ export const MachineDetailPage: React.FC = () => {
   const isFault = stats.faults > 0;
   const isWarning = stats.warnings > 0 && stats.faults === 0;
   const isOffline = !machine.isOnline;
-  const statusLabel = isFault ? 'FAULT' : isWarning ? 'WARNING' : isOffline ? 'OFFLINE' : 'ONLINE';
+  const statusLabel = isOffline ? 'OFFLINE' : isFault ? 'FAULT' : isWarning ? 'WARNING' : 'HEALTHY';
+
+  const isHardwareMachine = machine.isHardware || machine.id.replace('-', '') === 'M01';
 
   return (
     <div className="space-y-6">
@@ -52,6 +55,18 @@ export const MachineDetailPage: React.FC = () => {
               <h2 className="text-base font-semibold text-txt-primary">
                 {machine.name}
               </h2>
+
+              {isHardwareMachine ? (
+                <span className="px-2 py-0.5 rounded text-[11px] font-mono font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 flex items-center gap-1">
+                  <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                  REAL HARDWARE
+                </span>
+              ) : (
+                <span className="px-2 py-0.5 rounded text-[11px] font-mono font-bold bg-bg-tertiary text-txt-muted border border-surface-border">
+                  DEMO
+                </span>
+              )}
+
               <Badge status={statusLabel} size="sm">
                 {statusLabel}
               </Badge>
@@ -66,7 +81,25 @@ export const MachineDetailPage: React.FC = () => {
             </div>
           </div>
 
-          <div className="flex items-center gap-3 font-mono text-xs">
+          <div className="flex flex-wrap items-center gap-3 font-mono text-xs">
+            {isHardwareMachine && (
+              <>
+                <div className="bg-bg-primary px-3 py-1.5 rounded border border-surface-border text-center">
+                  <span className="text-[10px] text-txt-muted block uppercase">Machine State</span>
+                  <span className="font-bold text-emerald-400">
+                    {machine.metrics.machineState || 'RUNNING'}
+                  </span>
+                </div>
+
+                <div className="bg-bg-primary px-3 py-1.5 rounded border border-surface-border text-center">
+                  <span className="text-[10px] text-txt-muted block uppercase">Health Score</span>
+                  <span className="font-bold text-txt-primary">
+                    {machine.metrics.score ?? 95} / 100
+                  </span>
+                </div>
+              </>
+            )}
+
             <div className="bg-bg-primary px-3 py-1.5 rounded border border-surface-border text-center">
               <span className="text-[10px] text-txt-muted block uppercase">Hardware Sensors</span>
               <span className="font-bold text-txt-primary">{stats.healthy} / {stats.total} Healthy</span>

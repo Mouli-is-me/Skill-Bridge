@@ -83,6 +83,16 @@ export const MachineDetailHeader: React.FC<MachineDetailHeaderProps> = ({ machin
               <span className="text-xs font-mono font-semibold px-2 py-0.5 bg-bg-tertiary text-txt-secondary rounded">
                 {machine.type}
               </span>
+              {machine.isHardware || machine.id === 'M-01' || machine.id === 'M01' ? (
+                <span className="px-2 py-0.5 rounded text-[11px] font-mono font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 flex items-center gap-1">
+                  <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                  REAL HARDWARE
+                </span>
+              ) : (
+                <span className="px-2 py-0.5 rounded text-[11px] font-mono font-bold bg-bg-tertiary text-txt-muted border border-surface-border">
+                  DEMO
+                </span>
+              )}
               <Badge status={machine.status} size="md" />
             </div>
 

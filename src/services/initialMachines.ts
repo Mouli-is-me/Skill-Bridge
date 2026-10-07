@@ -4,19 +4,31 @@ import { createDefaultModulesForMachine } from '../utils/moduleHelpers';
 const RAW_INITIAL_MACHINES: Omit<Machine, 'modules'>[] = [
   {
     id: 'M-01',
-    name: 'Air-Jet Loom A1',
+    name: 'Air-Jet Loom A1 (Physical Hardware)',
     type: 'Loom',
     location: 'Line A',
     section: 'Weaving Bay 1',
     status: 'RUNNING',
+    isHardware: true,
+    hardwareState: {
+      espConnected: true,
+      backendConnected: true,
+      lastSeenSecondsAgo: 0
+    },
     metrics: {
-      rpm: 920,
-      temperature: 68.4,
-      vibration: 2.1,
-      current: 18.2,
-      utilization: 94.5,
-      production: 92,
-      oee: 89.2
+      rpm: 0,
+      temperature: 31.5,
+      vibration: 0.123,
+      current: 0,
+      utilization: 100,
+      production: 0,
+      oee: 92,
+      rmsVibration: 0.123,
+      peakVibration: 0.421,
+      vibrationEvents: 3,
+      digitalVibrationState: 'QUIET',
+      machineState: 'RUNNING',
+      score: 92
     },
     thresholds: {
       tempWarning: 75,
@@ -28,8 +40,8 @@ const RAW_INITIAL_MACHINES: Omit<Machine, 'modules'>[] = [
     },
     lastUpdated: new Date().toISOString(),
     isOnline: true,
-    model: 'Tsudakoma ZAX9200',
-    installedDate: '2022-03-15'
+    model: 'ESP32 Real Hardware Unit',
+    installedDate: '2026-10-07'
   },
   {
     id: 'M-02',

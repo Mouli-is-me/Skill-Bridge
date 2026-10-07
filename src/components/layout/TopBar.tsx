@@ -10,7 +10,10 @@ export const TopBar: React.FC = () => {
   const location = useLocation();
   const { connectionStatus, lastSyncTime } = useSimulationStore();
   const { theme, toggleTheme } = useUIStore();
+  const machines = useMachineStore((s) => s.machines);
   const events = useMachineStore((s) => s.events);
+
+  const m01Hardware = machines.find((m) => m.id === 'M-01' || m.id === 'M01');
 
   // Real-time seconds counter since last sync
   const [secondsAgo, setSecondsAgo] = useState(0);
@@ -55,30 +58,38 @@ export const TopBar: React.FC = () => {
 
       {/* Right Live Status & Actions */}
       <div className="flex items-center gap-3 sm:gap-4">
-        {/* System Online / Live Telemetry Status */}
-        <div className="flex items-center gap-2 font-mono text-xs">
-          {connectionStatus === 'LIVE' ? (
-            <div className="flex items-center gap-2 bg-bg-primary px-2.5 py-1 rounded border border-surface-border">
-              <span className="relative flex h-2 w-2">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-status-healthy opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-status-healthy"></span>
-              </span>
-              <span className="text-txt-primary font-bold text-[11px] tracking-wide">SYSTEM ONLINE</span>
-              <span className="text-txt-muted text-[10px] hidden md:inline">
-                • Updated {secondsAgo === 0 ? 'just now' : `${secondsAgo}s ago`}
-              </span>
-            </div>
-          ) : connectionStatus === 'DEGRADED' ? (
-            <Badge status="WARNING" size="sm">
-              <AlertTriangle className="w-3 h-3 mr-1 inline" />
-              DEGRADED
-            </Badge>
-          ) : (
-            <Badge status="FAULT" size="sm">
-              <WifiOff className="w-3 h-3 mr-1 inline" />
-              OFFLINE
-            </Badge>
-          )}
+        {/* Real Hardware Connection Chain Indicators */}
+        <div className="hidden sm:flex items-center gap-2 bg-bg-primary px-3 py-1 rounded-lg border border-surface-border font-mono text-[11px]">
+          {/* ESP32 Indicator */}
+          <div className="flex items-center gap-1.5" title="Physical ESP32 Microcontroller Status">
+            <span className={`inline-block h-2 w-2 rounded-full ${m01Hardware?.hardwareState?.espConnected ? 'bg-status-healthy animate-pulse' : 'bg-status-fault'}`} />
+            <span className="text-txt-secondary">ESP32</span>
+            <span className={m01Hardware?.hardwareState?.espConnected ? 'text-status-healthy font-bold' : 'text-txt-muted'}>
+              {m01Hardware?.hardwareState?.espConnected ? 'Connected' : 'Disconnected'}
+            </span>
+          </div>
+
+          <span className="text-txt-muted opacity-50">│</span>
+
+          {/* Backend Indicator */}
+          <div className="flex items-center gap-1.5" title="FastAPI Backend WebSocket Connection">
+            <span className={`inline-block h-2 w-2 rounded-full ${m01Hardware?.hardwareState?.backendConnected ? 'bg-status-healthy animate-pulse' : 'bg-status-fault'}`} />
+            <span className="text-txt-secondary">Backend</span>
+            <span className={m01Hardware?.hardwareState?.backendConnected ? 'text-status-healthy font-bold' : 'text-txt-muted'}>
+              {m01Hardware?.hardwareState?.backendConnected ? 'Connected' : 'Disconnected'}
+            </span>
+          </div>
+
+          <span className="text-txt-muted opacity-50">│</span>
+
+          {/* M01 Status Indicator */}
+          <div className="flex items-center gap-1.5" title="Machine M01 Hardware Telemetry Status">
+            <span className={`inline-block h-2 w-2 rounded-full ${m01Hardware?.isOnline ? 'bg-status-healthy animate-pulse' : 'bg-status-fault'}`} />
+            <span className="text-txt-secondary">M01</span>
+            <span className={m01Hardware?.isOnline ? 'text-status-healthy font-bold' : 'text-status-fault font-bold'}>
+              {m01Hardware?.isOnline ? 'Live' : 'Offline'}
+            </span>
+          </div>
         </div>
 
         <div className="h-4 w-[1px] bg-surface-border hidden sm:block" />

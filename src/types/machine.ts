@@ -2,7 +2,7 @@ import { MachineModule } from './module';
 
 export type MachineType = 'Loom' | 'Spinning';
 
-export type MachineStatus = 'RUNNING' | 'WARNING' | 'ERROR' | 'IDLE';
+export type MachineStatus = 'RUNNING' | 'WARNING' | 'ERROR' | 'IDLE' | 'FAULT' | 'OFFLINE';
 
 export interface MachineThresholds {
   tempWarning: number;   // °C (default ~75)
@@ -16,15 +16,28 @@ export interface MachineThresholds {
 export interface MachineMetrics {
   rpm: number;
   temperature: number; // °C
-  vibration: number;   // mm/s
+  vibration: number;   // mm/s or RMS g
   current: number;     // Amps
   utilization: number; // % (0 - 100)
   production: number;  // units/hr
   oee: number;         // % (0 - 100)
+  // ESP32 Hardware specific metrics
+  rmsVibration?: number;
+  peakVibration?: number;
+  vibrationEvents?: number;
+  digitalVibrationState?: 'QUIET' | 'ACTIVE';
+  machineState?: string; // IDLE, STARTING, RUNNING, STOPPING, ABNORMAL, OFFLINE
+  score?: number;       // 0-100 ESP32 machine score
+}
+
+export interface HardwareConnectionState {
+  espConnected: boolean;
+  backendConnected: boolean;
+  lastSeenSecondsAgo: number;
 }
 
 export interface Machine {
-  id: string;            // e.g. "M-01"
+  id: string;            // e.g. "M-01" or "M01"
   name: string;          // e.g. "Air-Jet Loom A1"
   type: MachineType;
   location: string;      // e.g. "Production Line 1"
@@ -35,6 +48,8 @@ export interface Machine {
   modules: MachineModule[];
   lastUpdated: string;   // ISO string
   isOnline: boolean;
+  isHardware?: boolean;  // True for physical M01 hardware
+  hardwareState?: HardwareConnectionState;
   model: string;         // e.g. "Tsudakoma ZAX9200" / "Rieter G38"
   installedDate: string;
 }

@@ -47,7 +47,18 @@ export const MachineTable: React.FC<MachineTableProps> = ({ machines }) => {
                 >
                   <td className="py-3 px-4">
                     <div className="flex flex-col">
-                      <span className="font-bold text-txt-primary">{m.id}</span>
+                      <div className="flex items-center gap-1.5">
+                        <span className="font-bold text-txt-primary">{m.id}</span>
+                        {m.isHardware || m.id === 'M-01' || m.id === 'M01' ? (
+                          <span className="px-1.5 py-0.2 rounded text-[9px] font-mono font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
+                            REAL HARDWARE
+                          </span>
+                        ) : (
+                          <span className="px-1.5 py-0.2 rounded text-[9px] font-mono font-bold bg-bg-tertiary text-txt-muted border border-surface-border">
+                            DEMO
+                          </span>
+                        )}
+                      </div>
                       <span className="text-[11px] text-txt-secondary font-sans truncate max-w-[140px]">{m.name}</span>
                     </div>
                   </td>

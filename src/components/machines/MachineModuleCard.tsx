@@ -42,15 +42,17 @@ export const MachineModuleCard: React.FC<MachineModuleCardProps> = ({ module, ma
   const getModuleDescription = () => {
     switch (module.type) {
       case 'MPU6050':
-        return '6-Axis Acceleration & Gyroscope';
+        return '6-Axis Accelerometer & Vibration Sensor';
       case 'DS18B20':
-        return '1-Wire Digital Temperature';
+        return '1-Wire Digital Temperature Sensor';
       case 'LM393':
-        return 'Opto-Pulse Comparator';
+        return 'Digital Vibration Sensor Module';
       default:
         return 'Hardware Sensor';
     }
   };
+
+  const displayName = module.type === 'LM393' ? 'Digital Vibration Sensor' : module.name;
 
   return (
     <div
@@ -71,7 +73,7 @@ export const MachineModuleCard: React.FC<MachineModuleCardProps> = ({ module, ma
             <div>
               <div className="flex items-center gap-1.5">
                 <h4 className="text-sm font-bold font-mono uppercase tracking-wider text-txt-primary">
-                  {module.name}
+                  {displayName}
                 </h4>
                 <span className="text-[10px] font-mono px-1 py-0.2 rounded bg-bg-tertiary text-txt-muted">
                   HARDWARE
