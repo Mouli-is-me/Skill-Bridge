@@ -16,6 +16,9 @@ import { useUIStore } from "./store/uiStore";
 
 export const App: React.FC = () => {
   const theme = useUIStore((s) => s.theme);
+  const basename = window.location.hostname.endsWith("github.io")
+    ? "/Skill-Bridge"
+    : undefined;
 
   useEffect(() => {
     // Synchronize root theme class on startup
@@ -29,7 +32,7 @@ export const App: React.FC = () => {
   }, [theme]);
 
   return (
-    <BrowserRouter>
+    <BrowserRouter basename={basename}>
       <Routes>
         <Route element={<AppLayout />}>
           <Route path="/" element={<Navigate to="/dashboard" replace />} />
