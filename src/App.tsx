@@ -16,9 +16,15 @@ import { useUIStore } from "./store/uiStore";
 
 export const App: React.FC = () => {
   const theme = useUIStore((s) => s.theme);
-  const basename = window.location.hostname.endsWith("github.io")
-    ? "/Skill-Bridge"
-    : undefined;
+
+  // Determine React Router basename for GitHub Pages subpath deployment
+  const rawBase = import.meta.env.BASE_URL || "/";
+  const basename =
+    rawBase !== "/"
+      ? rawBase.replace(/\/$/, "")
+      : window.location.pathname.startsWith("/Skill-Bridge")
+      ? "/Skill-Bridge"
+      : undefined;
 
   useEffect(() => {
     // Synchronize root theme class on startup
@@ -49,7 +55,7 @@ export const App: React.FC = () => {
           <Route path="/events" element={<EventsPage />} />
           <Route path="/settings" element={<SettingsPage />} />
 
-          {/* Preserved secondary routes */}
+          {/* Secondary routes */}
           <Route path="/compare" element={<ComparePage />} />
           <Route path="/analytics" element={<AnalyticsPage />} />
           <Route path="/reports" element={<ReportsPage />} />
@@ -60,4 +66,5 @@ export const App: React.FC = () => {
     </BrowserRouter>
   );
 };
+
 export default App;
