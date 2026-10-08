@@ -1,12 +1,12 @@
-import React, { useEffect } from 'react';
-import { Outlet } from 'react-router-dom';
-import { Sidebar } from './Sidebar';
-import { TopBar } from './TopBar';
-import { MobileNav } from './MobileNav';
-import { useSimulationStore } from '../../store/simulationStore';
-import { startSimulationEngine } from '../../services/simulationEngine';
-import { AlertOctagon, RefreshCw } from 'lucide-react';
-import { Button } from '../ui/Button';
+import React, { useEffect } from "react";
+import { Outlet } from "react-router-dom";
+import { Sidebar } from "./Sidebar";
+import { TopBar } from "./TopBar";
+import { MobileNav } from "./MobileNav";
+import { useSimulationStore } from "../../store/simulationStore";
+import { startSimulationEngine } from "../../services/simulationEngine";
+import { AlertOctagon, RefreshCw } from "lucide-react";
+import { Button } from "../ui/Button";
 
 export const AppLayout: React.FC = () => {
   const { connectionStatus, retryConnection } = useSimulationStore();
@@ -28,11 +28,14 @@ export const AppLayout: React.FC = () => {
         <TopBar />
 
         {/* Connection Outage / Offline Warning Banner */}
-        {(connectionStatus === 'CONNECTION_LOST' || connectionStatus === 'OFFLINE') && (
+        {(connectionStatus === "CONNECTION_LOST" ||
+          connectionStatus === "OFFLINE") && (
           <div className="bg-rose-600 text-white px-4 py-2.5 flex items-center justify-between text-xs font-semibold shrink-0 z-30 shadow-md">
             <div className="flex items-center gap-2">
               <AlertOctagon className="w-4 h-4 shrink-0 animate-pulse" />
-              <span>Telemetry connection lost. Displaying cached operational data.</span>
+              <span>
+                Telemetry connection lost. Displaying cached operational data.
+              </span>
             </div>
             <Button
               size="sm"
@@ -47,7 +50,7 @@ export const AppLayout: React.FC = () => {
         )}
 
         {/* Page Content Scroll Container */}
-        <main className="flex-1 overflow-y-auto p-4 sm:p-6 pb-20 md:pb-6 space-y-6">
+        <main className="flex-1 overflow-y-auto px-4 py-5 sm:px-6 lg:px-8 pb-20 md:pb-8">
           <Outlet />
         </main>
 
