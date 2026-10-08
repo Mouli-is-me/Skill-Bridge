@@ -1,29 +1,31 @@
-import React, { useState } from 'react';
-import { useMachineStore } from '../store/machineStore';
-import { KPIGrid } from '../components/analytics/KPIGrid';
-import { UtilizationChart } from '../components/analytics/UtilizationChart';
-import { DowntimeChart } from '../components/analytics/DowntimeChart';
-import { PerformanceRanking } from '../components/analytics/PerformanceRanking';
-import { Tabs } from '../components/ui/Tabs';
+import React, { useState } from "react";
+import { useMachineStore } from "../store/machineStore";
+import { KPIGrid } from "../components/analytics/KPIGrid";
+import { UtilizationChart } from "../components/analytics/UtilizationChart";
+import { DowntimeChart } from "../components/analytics/DowntimeChart";
+import { PerformanceRanking } from "../components/analytics/PerformanceRanking";
+import { Tabs } from "../components/ui/Tabs";
 
 export const AnalyticsPage: React.FC = () => {
   const machines = useMachineStore((s) => s.machines);
-  const [periodTrend, setPeriodTrend] = useState<string>('Daily');
+  const [periodTrend, setPeriodTrend] = useState<string>("Daily");
 
   const periodTabs = [
-    { id: 'Daily', label: 'Daily Trend' },
-    { id: 'Weekly', label: 'Weekly Trend' },
-    { id: 'Monthly', label: 'Monthly Trend' }
+    { id: "Daily", label: "Daily Trend" },
+    { id: "Weekly", label: "Weekly Trend" },
+    { id: "Monthly", label: "Monthly Trend" },
   ];
 
   return (
-    <div className="space-y-6">
-      {/* Top Header & Trend Toggle */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-surface border border-surface-border p-4 rounded-xl shadow-subtle">
+    <div className="space-y-4">
+      {/* Top Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-surface border border-surface-border p-3.5 rounded-md">
         <div>
-          <h2 className="text-xl font-extrabold text-txt-primary tracking-tight">OEE & Analytics Intelligence</h2>
-          <p className="text-xs text-txt-secondary font-mono">
-            Plant-wide equipment efficiency, downtime loss breakdown, and asset benchmarks
+          <h2 className="text-sm font-bold text-txt-primary tracking-tight font-mono">
+            OEE & PERFORMANCE ANALYTICS
+          </h2>
+          <p className="text-[11px] text-txt-secondary font-mono">
+            Equipment efficiency scores, downtime distribution, and fleet benchmarks
           </p>
         </div>
 
@@ -38,7 +40,7 @@ export const AnalyticsPage: React.FC = () => {
       <KPIGrid />
 
       {/* Charts Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         <UtilizationChart machines={machines} />
         <DowntimeChart />
       </div>

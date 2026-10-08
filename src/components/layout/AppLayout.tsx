@@ -17,7 +17,7 @@ export const AppLayout: React.FC = () => {
   }, []);
 
   return (
-    <div className="flex h-screen w-screen overflow-hidden bg-bg-primary text-txt-primary">
+    <div className="flex h-screen w-screen overflow-hidden bg-bg-primary text-txt-primary font-sans antialiased">
       {/* Sidebar - Desktop & Tablet */}
       <div className="hidden md:flex flex-col h-full shrink-0">
         <Sidebar />
@@ -30,9 +30,9 @@ export const AppLayout: React.FC = () => {
         {/* Connection Outage / Offline Warning Banner */}
         {(connectionStatus === "CONNECTION_LOST" ||
           connectionStatus === "OFFLINE") && (
-          <div className="bg-rose-600 text-white px-4 py-2.5 flex items-center justify-between text-xs font-semibold shrink-0 z-30 shadow-md">
+          <div className="bg-rose-600 text-white px-4 py-2 flex items-center justify-between text-xs font-medium shrink-0 z-30 shadow-subtle">
             <div className="flex items-center gap-2">
-              <AlertOctagon className="w-4 h-4 shrink-0 animate-pulse" />
+              <AlertOctagon className="w-4 h-4 shrink-0" />
               <span>
                 Telemetry connection lost. Displaying cached operational data.
               </span>
@@ -42,7 +42,7 @@ export const AppLayout: React.FC = () => {
               variant="secondary"
               onClick={retryConnection}
               icon={<RefreshCw className="w-3 h-3 text-txt-primary" />}
-              className="text-xs font-bold"
+              className="text-xs font-semibold"
             >
               Re-establish Link
             </Button>
@@ -51,7 +51,9 @@ export const AppLayout: React.FC = () => {
 
         {/* Page Content Scroll Container */}
         <main className="flex-1 overflow-y-auto px-4 py-5 sm:px-6 lg:px-8 pb-20 md:pb-8">
-          <Outlet />
+          <div className="max-w-7xl mx-auto space-y-6">
+            <Outlet />
+          </div>
         </main>
 
         {/* Mobile Navigation */}

@@ -7,7 +7,7 @@ import { Badge } from '../components/ui/Badge';
 import { Button } from '../components/ui/Button';
 import { getMachineModuleStats } from '../utils/moduleHelpers';
 import { formatTimeAgo } from '../utils/formatting';
-import { ArrowLeft, Cpu, Layers } from 'lucide-react';
+import { ArrowLeft, Layers } from 'lucide-react';
 
 export const MachineDetailPage: React.FC = () => {
   const { machineId } = useParams<{ machineId: string }>();
@@ -33,37 +33,37 @@ export const MachineDetailPage: React.FC = () => {
   const isHardwareMachine = machine.isHardware || machine.id.replace('-', '') === 'M01';
 
   return (
-    <div className="space-y-6">
-      {/* Top Navigation & Breadcrumb */}
+    <div className="space-y-4">
+      {/* Top Navigation */}
       <div>
         <button
           onClick={() => navigate('/machines')}
-          className="inline-flex items-center gap-1.5 text-xs font-mono font-medium text-txt-secondary hover:text-txt-primary transition-colors mb-3"
+          className="inline-flex items-center gap-1 text-xs font-mono text-txt-secondary hover:text-txt-primary transition-colors mb-2.5 select-none"
         >
           <ArrowLeft className="w-3.5 h-3.5" />
-          <span>Back to Machines</span>
+          <span>Back to Machine Directory</span>
         </button>
 
-        {/* Machine Identity Header Card */}
-        <div className="bg-surface border border-surface-border p-4 rounded-lg shadow-subtle flex flex-col md:flex-row md:items-center justify-between gap-4">
+        {/* Machine Header */}
+        <div className="bg-surface border border-surface-border p-4 rounded-md flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div className="space-y-1">
-            <div className="flex items-center gap-2.5">
-              <span className="font-mono font-bold text-lg text-txt-primary">
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="font-mono font-bold text-base text-txt-primary">
                 {machine.id}
               </span>
               <span className="text-txt-muted text-xs font-mono">•</span>
-              <h2 className="text-base font-semibold text-txt-primary">
+              <h2 className="text-sm font-semibold text-txt-primary">
                 {machine.name}
               </h2>
 
               {isHardwareMachine ? (
-                <span className="px-2 py-0.5 rounded text-[11px] font-mono font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 flex items-center gap-1">
-                  <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                  REAL HARDWARE
+                <span className="px-1.5 py-0.2 rounded-xs text-[10px] font-mono font-bold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 flex items-center gap-1">
+                  <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                  PHYSICAL HARDWARE
                 </span>
               ) : (
-                <span className="px-2 py-0.5 rounded text-[11px] font-mono font-bold bg-bg-tertiary text-txt-muted border border-surface-border">
-                  DEMO
+                <span className="px-1.5 py-0.2 rounded-xs text-[10px] font-mono font-medium bg-bg-secondary text-txt-muted border border-surface-border">
+                  TELEMETRY SIM
                 </span>
               )}
 
@@ -73,36 +73,36 @@ export const MachineDetailPage: React.FC = () => {
             </div>
 
             <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs font-mono text-txt-secondary">
-              <span>{machine.model}</span>
+              <span>Model: {machine.model}</span>
               <span className="text-txt-muted">•</span>
-              <span>{machine.location} ({machine.section})</span>
+              <span>Location: {machine.location} ({machine.section})</span>
               <span className="text-txt-muted">•</span>
-              <span>Last updated: {formatTimeAgo(machine.lastUpdated)}</span>
+              <span>Updated: {formatTimeAgo(machine.lastUpdated)}</span>
             </div>
           </div>
 
-          <div className="flex flex-wrap items-center gap-3 font-mono text-xs">
+          <div className="flex flex-wrap items-center gap-2 font-mono text-xs">
             {isHardwareMachine && (
               <>
-                <div className="bg-bg-primary px-3 py-1.5 rounded border border-surface-border text-center">
-                  <span className="text-[10px] text-txt-muted block uppercase">Machine State</span>
-                  <span className="font-bold text-emerald-400">
+                <div className="bg-bg-primary/50 px-2.5 py-1 rounded-xs border border-surface-border text-center">
+                  <span className="text-[10px] text-txt-muted block uppercase">State</span>
+                  <span className="font-bold text-emerald-600 dark:text-emerald-400 text-xs">
                     {machine.metrics.machineState || 'RUNNING'}
                   </span>
                 </div>
 
-                <div className="bg-bg-primary px-3 py-1.5 rounded border border-surface-border text-center">
-                  <span className="text-[10px] text-txt-muted block uppercase">Health Score</span>
-                  <span className="font-bold text-txt-primary">
+                <div className="bg-bg-primary/50 px-2.5 py-1 rounded-xs border border-surface-border text-center">
+                  <span className="text-[10px] text-txt-muted block uppercase">Score</span>
+                  <span className="font-bold text-txt-primary text-xs">
                     {machine.metrics.score ?? 95} / 100
                   </span>
                 </div>
               </>
             )}
 
-            <div className="bg-bg-primary px-3 py-1.5 rounded border border-surface-border text-center">
-              <span className="text-[10px] text-txt-muted block uppercase">Hardware Sensors</span>
-              <span className="font-bold text-txt-primary">{stats.healthy} / {stats.total} Healthy</span>
+            <div className="bg-bg-primary/50 px-2.5 py-1 rounded-xs border border-surface-border text-center">
+              <span className="text-[10px] text-txt-muted block uppercase">Sensors</span>
+              <span className="font-bold text-txt-primary text-xs">{stats.healthy} / {stats.total} Healthy</span>
             </div>
 
             <Button
@@ -110,19 +110,19 @@ export const MachineDetailPage: React.FC = () => {
               variant="outline"
               onClick={() => navigate('/machines')}
             >
-              Fleet Directory
+              Directory
             </Button>
           </div>
         </div>
       </div>
 
-      {/* Primary Focus: 3 PHYSICAL HARDWARE SENSORS */}
-      <div className="space-y-3">
+      {/* Hardware Sensor Modules */}
+      <div className="space-y-2.5">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <Layers className="w-4 h-4 text-txt-secondary" />
-            <h3 className="text-sm font-bold text-txt-primary uppercase font-mono tracking-wider">
-              PHYSICAL HARDWARE SENSORS ({modules.length})
+            <Layers className="w-3.5 h-3.5 text-txt-secondary" />
+            <h3 className="text-xs font-bold text-txt-primary uppercase font-mono tracking-wider">
+              HARDWARE MODULES ({modules.length})
             </h3>
           </div>
           <span className="text-xs font-mono text-txt-muted">
@@ -130,7 +130,7 @@ export const MachineDetailPage: React.FC = () => {
           </span>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
           {modules.map((mod) => (
             <MachineModuleCard
               key={mod.id}
@@ -141,14 +141,14 @@ export const MachineDetailPage: React.FC = () => {
         </div>
       </div>
 
-      {/* Sensor Telemetry Trend Chart */}
-      <div className="space-y-3 pt-2">
+      {/* Telemetry Stream Chart */}
+      <div className="space-y-2.5 pt-1">
         <div className="flex items-center justify-between">
-          <h3 className="text-sm font-bold text-txt-primary uppercase font-mono tracking-wider">
-            HARDWARE TELEMETRY STREAM
+          <h3 className="text-xs font-bold text-txt-primary uppercase font-mono tracking-wider">
+            SENSOR TELEMETRY STREAM
           </h3>
           <span className="text-xs font-mono text-txt-muted">
-            Continuous readings from DS18B20 & MPU6050
+            Continuous telemetry feed
           </span>
         </div>
 

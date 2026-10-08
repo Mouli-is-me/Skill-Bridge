@@ -30,12 +30,12 @@ export const SensorChart: React.FC<SensorChartProps> = ({
   const [timeRange, setTimeRange] = useState<string>('24H');
 
   const metricTabs = [
-    { id: 'temperature', label: 'Temperature (°C)' },
-    { id: 'vibration', label: 'Vibration (mm/s)' },
+    { id: 'temperature', label: 'Temp (°C)' },
+    { id: 'vibration', label: 'Vib (mm/s)' },
     { id: 'rpm', label: 'RPM' },
     { id: 'current', label: 'Current (A)' },
-    { id: 'production', label: 'Production (u/h)' },
-    { id: 'utilization', label: 'Utilization (%)' },
+    { id: 'production', label: 'Output (u/h)' },
+    { id: 'utilization', label: 'Util (%)' },
   ];
 
   const rangeOptions = [
@@ -44,7 +44,6 @@ export const SensorChart: React.FC<SensorChartProps> = ({
     { label: '24 Hours', value: '24H' },
   ];
 
-  // Process data points and stats
   const { chartData, stats } = useMemo(() => {
     if (!history || !history.hourlyPoints) {
       return { chartData: [], stats: { current: 0, min: 0, max: 0, avg: 0 } };
@@ -73,15 +72,15 @@ export const SensorChart: React.FC<SensorChartProps> = ({
   const thresholdValue = metricKey === 'temperature' ? tempWarningThreshold : metricKey === 'vibration' ? vibWarningThreshold : null;
 
   return (
-    <Card className="space-y-4">
+    <Card className="space-y-3 font-sans" padding="md">
       {/* Header & Controls */}
-      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 border-b border-surface-border pb-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-surface-border pb-3">
         <div>
-          <h3 className="text-base font-bold text-txt-primary">Live Sensor Data Stream</h3>
-          <p className="text-xs text-txt-secondary font-mono">High-frequency telemetry time series</p>
+          <h3 className="text-xs font-semibold text-txt-primary">Live Telemetry Stream</h3>
+          <p className="text-[11px] text-txt-secondary font-mono">Continuous sensor values</p>
         </div>
 
-        <div className="flex flex-wrap items-center gap-3">
+        <div className="flex flex-wrap items-center gap-2">
           <Tabs
             tabs={metricTabs}
             activeTab={metricKey}
@@ -96,47 +95,48 @@ export const SensorChart: React.FC<SensorChartProps> = ({
         </div>
       </div>
 
-      {/* Stats Summary Strip (Current / Min / Max / Avg) */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 bg-bg-primary/80 border border-surface-border/60 p-3 rounded-lg font-mono text-xs">
+      {/* Stats Summary Strip */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 bg-bg-secondary/60 border border-surface-border p-2.5 rounded-xs font-mono text-xs">
         <div>
-          <span className="text-[10px] text-txt-muted uppercase">Current Value</span>
-          <span className="font-bold text-txt-primary block text-sm mt-0.5">
+          <span className="text-[10px] text-txt-muted uppercase">Current</span>
+          <span className="font-bold text-txt-primary block text-xs mt-0.5">
             {formatMetricValue(stats.current, metricKey)}
           </span>
         </div>
         <div>
-          <span className="text-[10px] text-txt-muted uppercase">Min (Period)</span>
-          <span className="font-semibold text-txt-secondary block text-sm mt-0.5">
+          <span className="text-[10px] text-txt-muted uppercase">Min</span>
+          <span className="font-semibold text-txt-secondary block text-xs mt-0.5">
             {formatMetricValue(stats.min, metricKey)}
           </span>
         </div>
         <div>
-          <span className="text-[10px] text-txt-muted uppercase">Max (Period)</span>
-          <span className="font-semibold text-txt-secondary block text-sm mt-0.5">
+          <span className="text-[10px] text-txt-muted uppercase">Max</span>
+          <span className="font-semibold text-txt-secondary block text-xs mt-0.5">
             {formatMetricValue(stats.max, metricKey)}
           </span>
         </div>
         <div>
-          <span className="text-[10px] text-txt-muted uppercase">Average (Period)</span>
-          <span className="font-semibold text-accent block text-sm mt-0.5">
+          <span className="text-[10px] text-txt-muted uppercase">Average</span>
+          <span className="font-semibold text-accent block text-xs mt-0.5">
             {formatMetricValue(stats.avg, metricKey)}
           </span>
         </div>
       </div>
 
-      {/* Recharts Line Stream */}
-      <div className="h-64 w-full pt-2">
+      {/* Recharts Stream */}
+      <div className="h-60 w-full pt-1">
         <ResponsiveContainer width="100%" height="100%">
-          <LineChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-            <CartesianGrid strokeDasharray="3 3" stroke="var(--border-color)" vertical={false} opacity={0.5} />
-            <XAxis dataKey="time" stroke="var(--text-muted)" fontSize={11} tickLine={false} />
-            <YAxis stroke="var(--text-muted)" fontSize={11} tickLine={false} axisLine={false} domain={['auto', 'auto']} />
+          <LineChart data={chartData} margin={{ top: 8, right: 8, left: -20, bottom: 0 }}>
+            <CartesianGrid strokeDasharray="3 3" stroke="var(--border-color)" vertical={false} opacity={0.6} />
+            <XAxis dataKey="time" stroke="var(--text-muted)" fontSize={10} tickLine={false} />
+            <YAxis stroke="var(--text-muted)" fontSize={10} tickLine={false} axisLine={false} domain={['auto', 'auto']} />
             <Tooltip
               contentStyle={{
                 backgroundColor: 'var(--surface)',
                 borderColor: 'var(--border-color)',
                 color: 'var(--text-primary)',
-                borderRadius: '6px'
+                borderRadius: '4px',
+                fontSize: '11px'
               }}
             />
             {thresholdValue && (
@@ -144,16 +144,16 @@ export const SensorChart: React.FC<SensorChartProps> = ({
                 y={thresholdValue}
                 stroke="#D97706"
                 strokeDasharray="4 4"
-                label={{ value: `Warning Limit (${thresholdValue})`, fill: '#D97706', fontSize: 10 }}
+                label={{ value: `Limit (${thresholdValue})`, fill: '#D97706', fontSize: 10 }}
               />
             )}
             <Line
               type="monotone"
               dataKey="val"
-              stroke="#16A34A"
-              strokeWidth={2}
+              stroke="#0F766E"
+              strokeWidth={1.5}
               dot={false}
-              activeDot={{ r: 5 }}
+              activeDot={{ r: 4 }}
               isAnimationActive={false}
             />
           </LineChart>

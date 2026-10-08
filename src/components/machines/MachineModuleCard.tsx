@@ -29,22 +29,22 @@ export const MachineModuleCard: React.FC<MachineModuleCardProps> = ({ module, ma
   const getModuleIcon = () => {
     switch (module.type) {
       case 'MPU6050':
-        return <Activity className="w-4 h-4 text-txt-secondary" />;
+        return <Activity className="w-3.5 h-3.5 text-txt-secondary" />;
       case 'DS18B20':
-        return <Thermometer className="w-4 h-4 text-txt-secondary" />;
+        return <Thermometer className="w-3.5 h-3.5 text-txt-secondary" />;
       case 'LM393':
-        return <Radio className="w-4 h-4 text-txt-secondary" />;
+        return <Radio className="w-3.5 h-3.5 text-txt-secondary" />;
       default:
-        return <Cpu className="w-4 h-4 text-txt-secondary" />;
+        return <Cpu className="w-3.5 h-3.5 text-txt-secondary" />;
     }
   };
 
   const getModuleDescription = () => {
     switch (module.type) {
       case 'MPU6050':
-        return '6-Axis Accelerometer & Vibration Sensor';
+        return '6-Axis Accelerometer & Vibration';
       case 'DS18B20':
-        return '1-Wire Digital Temperature Sensor';
+        return '1-Wire Digital Temp Sensor';
       case 'LM393':
         return 'Digital Vibration Sensor Module';
       default:
@@ -57,30 +57,30 @@ export const MachineModuleCard: React.FC<MachineModuleCardProps> = ({ module, ma
   return (
     <div
       className={clsx(
-        "bg-surface border rounded-lg p-4 flex flex-col justify-between transition-all shadow-subtle hover:border-txt-muted/50",
-        isFault ? "border-status-fault-border bg-status-fault-bg/10" :
-        isWarning ? "border-status-warning-border bg-status-warning-bg/10" :
-        "border-surface-border"
+        "bg-surface border rounded-md p-3 flex flex-col justify-between transition-all",
+        isFault ? "border-rose-500/30 bg-rose-500/5" :
+        isWarning ? "border-amber-500/30 bg-amber-500/5" :
+        "border-surface-border hover:border-surface-border/80"
       )}
     >
       <div>
         {/* Module Header */}
-        <div className="flex items-start justify-between pb-3 border-b border-surface-border/60">
-          <div className="flex items-start gap-2.5">
-            <div className="p-1.5 rounded bg-bg-primary border border-surface-border/70 mt-0.5">
+        <div className="flex items-start justify-between pb-2 border-b border-surface-border">
+          <div className="flex items-start gap-2">
+            <div className="p-1 rounded-xs bg-bg-secondary border border-surface-border mt-0.5">
               {getModuleIcon()}
             </div>
             <div>
               <div className="flex items-center gap-1.5">
-                <h4 className="text-sm font-bold font-mono uppercase tracking-wider text-txt-primary">
+                <h4 className="text-xs font-bold font-mono uppercase tracking-wider text-txt-primary">
                   {displayName}
                 </h4>
-                <span className="text-[10px] font-mono px-1 py-0.2 rounded bg-bg-tertiary text-txt-muted">
-                  HARDWARE
+                <span className="text-[9px] font-mono px-1 py-0.2 rounded-xs bg-bg-secondary text-txt-muted border border-surface-border">
+                  HW
                 </span>
               </div>
-              <div className="text-[11px] font-mono text-txt-muted mt-0.5">
-                Module: <span className="font-semibold text-txt-secondary">{module.id}</span>
+              <div className="text-[10px] font-mono text-txt-muted mt-0.5">
+                ID: <span className="font-semibold text-txt-secondary">{module.id}</span>
               </div>
             </div>
           </div>
@@ -90,12 +90,12 @@ export const MachineModuleCard: React.FC<MachineModuleCardProps> = ({ module, ma
           </Badge>
         </div>
 
-        <div className="text-[10px] font-mono text-txt-muted mt-2">
+        <div className="text-[10px] font-mono text-txt-muted mt-1.5">
           {getModuleDescription()}
         </div>
 
-        {/* Live Sensor Readings Table */}
-        <div className="py-2.5 space-y-1.5 font-mono text-xs">
+        {/* Live Sensor Readings */}
+        <div className="py-2 space-y-1 font-mono text-xs">
           {module.sensors.map((sensor) => {
             const isSensorWarn = sensor.status === 'WARNING';
             const isSensorFault = sensor.status === 'FAULT';
@@ -103,16 +103,16 @@ export const MachineModuleCard: React.FC<MachineModuleCardProps> = ({ module, ma
             return (
               <div
                 key={sensor.id}
-                className="flex items-center justify-between py-1 px-1.5 rounded hover:bg-bg-primary/50 transition-colors"
+                className="flex items-center justify-between py-0.5 px-1 rounded-xs hover:bg-bg-primary/50 transition-colors"
               >
-                <span className="text-txt-secondary text-[11px] truncate max-w-[140px]">
+                <span className="text-txt-secondary text-[11px] truncate max-w-[130px]">
                   {sensor.name}
                 </span>
 
                 <span className={clsx(
                   "font-bold text-[11px]",
-                  isSensorFault ? "text-status-fault" :
-                  isSensorWarn ? "text-status-warning" :
+                  isSensorFault ? "text-rose-600 dark:text-rose-400" :
+                  isSensorWarn ? "text-amber-600 dark:text-amber-400" :
                   "text-txt-primary"
                 )}>
                   {sensor.displayState ? (
@@ -127,18 +127,18 @@ export const MachineModuleCard: React.FC<MachineModuleCardProps> = ({ module, ma
         </div>
       </div>
 
-      {/* Footer: Last Update & View Details */}
-      <div className="pt-3 border-t border-surface-border/60 flex items-center justify-between font-mono text-xs">
+      {/* Footer */}
+      <div className="pt-2 border-t border-surface-border flex items-center justify-between font-mono text-xs">
         <span className="text-[10px] text-txt-muted">
-          Last update {formatTimeAgo(module.lastUpdated)}
+          Updated {formatTimeAgo(module.lastUpdated)}
         </span>
 
         <button
           onClick={() => navigate(`/machines/${machineId}/modules/${module.id}`)}
-          className="inline-flex items-center gap-1 text-xs font-semibold text-accent hover:text-accent-hover transition-colors px-2.5 py-1 rounded hover:bg-surface-active"
+          className="inline-flex items-center gap-1 text-xs font-semibold text-accent hover:text-accent-hover transition-colors px-2 py-0.5 rounded-xs hover:bg-surface-hover"
         >
-          <span>View Details</span>
-          <ArrowRight className="w-3.5 h-3.5" />
+          <span>Details</span>
+          <ArrowRight className="w-3 h-3" />
         </button>
       </div>
     </div>

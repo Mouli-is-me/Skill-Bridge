@@ -24,8 +24,8 @@ export const ProductionChart: React.FC<ProductionChartProps> = ({ historyMap }) 
   const [selectedMachineId, setSelectedMachineId] = useState<string>('ALL');
 
   const chartTabs = [
-    { id: 'production', label: 'Production Output (u/h)' },
-    { id: 'utilization', label: 'Utilization Rate (%)' },
+    { id: 'production', label: 'Production (u/h)' },
+    { id: 'utilization', label: 'Utilization (%)' },
     { id: 'downtime', label: 'Downtime (min)' }
   ];
 
@@ -42,7 +42,6 @@ export const ProductionChart: React.FC<ProductionChartProps> = ({ historyMap }) 
     ...Object.keys(historyMap).map(id => ({ label: `Machine ${id}`, value: id }))
   ];
 
-  // Process data points for Recharts based on controls
   const chartData = useMemo(() => {
     const hoursLimit = timeRange === '1H' ? 1 : timeRange === '6H' ? 6 : timeRange === '12H' ? 12 : timeRange === '24H' ? 24 : 168;
 
@@ -56,7 +55,6 @@ export const ProductionChart: React.FC<ProductionChartProps> = ({ historyMap }) 
       }));
     }
 
-    // Aggregate across all machines
     const machineIds = Object.keys(historyMap);
     if (machineIds.length === 0) return [];
 
@@ -87,23 +85,23 @@ export const ProductionChart: React.FC<ProductionChartProps> = ({ historyMap }) 
   }, [historyMap, selectedMachineId, timeRange]);
 
   const getSeriesColor = () => {
-    if (activeTab === 'production') return { stroke: '#16A34A', fill: 'rgba(22, 163, 74, 0.15)' };
-    if (activeTab === 'utilization') return { stroke: '#2563EB', fill: 'rgba(37, 99, 235, 0.15)' };
-    return { stroke: '#DC2626', fill: 'rgba(220, 38, 38, 0.15)' };
+    if (activeTab === 'production') return { stroke: '#059669', fill: 'rgba(5, 150, 105, 0.12)' };
+    if (activeTab === 'utilization') return { stroke: '#0F766E', fill: 'rgba(15, 118, 110, 0.12)' };
+    return { stroke: '#DC2626', fill: 'rgba(220, 38, 38, 0.12)' };
   };
 
   const colorConfig = getSeriesColor();
 
   return (
-    <Card className="space-y-4">
+    <Card className="space-y-4" padding="md">
       {/* Header & Controls */}
-      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 border-b border-surface-border pb-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-surface-border pb-3">
         <div>
-          <h3 className="text-base font-bold text-txt-primary">Production & Fleet Performance Trend</h3>
-          <p className="text-xs text-txt-secondary font-mono">Real-time aggregated sensor telemetry timeseries</p>
+          <h3 className="text-xs font-semibold text-txt-primary">Fleet Performance Trend</h3>
+          <p className="text-[11px] text-txt-secondary font-mono">Aggregated telemetry timeseries</p>
         </div>
 
-        <div className="flex flex-wrap items-center gap-3">
+        <div className="flex flex-wrap items-center gap-2">
           <Tabs
             tabs={chartTabs}
             activeTab={activeTab}
@@ -125,26 +123,26 @@ export const ProductionChart: React.FC<ProductionChartProps> = ({ historyMap }) 
       </div>
 
       {/* Recharts Area */}
-      <div className="h-72 w-full pt-2">
+      <div className="h-64 w-full pt-1">
         <ResponsiveContainer width="100%" height="100%">
-          <AreaChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+          <AreaChart data={chartData} margin={{ top: 8, right: 8, left: -20, bottom: 0 }}>
             <defs>
               <linearGradient id="chartGradient" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor={colorConfig.stroke} stopOpacity={0.3} />
+                <stop offset="5%" stopColor={colorConfig.stroke} stopOpacity={0.25} />
                 <stop offset="95%" stopColor={colorConfig.stroke} stopOpacity={0.0} />
               </linearGradient>
             </defs>
-            <CartesianGrid strokeDasharray="3 3" stroke="var(--border-color)" vertical={false} opacity={0.5} />
+            <CartesianGrid strokeDasharray="3 3" stroke="var(--border-color)" vertical={false} opacity={0.6} />
             <XAxis
               dataKey="time"
               stroke="var(--text-muted)"
-              fontSize={11}
+              fontSize={10}
               tickLine={false}
               axisLine={{ stroke: 'var(--border-color)' }}
             />
             <YAxis
               stroke="var(--text-muted)"
-              fontSize={11}
+              fontSize={10}
               tickLine={false}
               axisLine={false}
               domain={['auto', 'auto']}
@@ -154,14 +152,15 @@ export const ProductionChart: React.FC<ProductionChartProps> = ({ historyMap }) 
                 backgroundColor: 'var(--surface)',
                 borderColor: 'var(--border-color)',
                 color: 'var(--text-primary)',
-                borderRadius: '6px'
+                borderRadius: '4px',
+                fontSize: '11px'
               }}
             />
             <Area
               type="monotone"
               dataKey={activeTab}
               stroke={colorConfig.stroke}
-              strokeWidth={2}
+              strokeWidth={1.5}
               fillOpacity={1}
               fill="url(#chartGradient)"
               isAnimationActive={false}

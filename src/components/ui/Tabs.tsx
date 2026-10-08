@@ -1,5 +1,5 @@
-import React from 'react';
-import { clsx } from 'clsx';
+import React from "react";
+import { clsx } from "clsx";
 
 interface TabOption {
   id: string;
@@ -11,7 +11,7 @@ interface TabsProps {
   tabs: TabOption[];
   activeTab: string;
   onChange: (tabId: string) => void;
-  variant?: 'pills' | 'underline';
+  variant?: "pills" | "underline";
   className?: string;
 }
 
@@ -19,12 +19,14 @@ export const Tabs: React.FC<TabsProps> = ({
   tabs,
   activeTab,
   onChange,
-  variant = 'pills',
-  className
+  variant = "pills",
+  className,
 }) => {
-  if (variant === 'underline') {
+  if (variant === "underline") {
     return (
-      <div className={clsx("flex border-b border-surface-border gap-6", className)}>
+      <div
+        className={clsx("flex border-b border-surface-border gap-5", className)}
+      >
         {tabs.map((tab) => {
           const isActive = tab.id === activeTab;
           return (
@@ -32,18 +34,22 @@ export const Tabs: React.FC<TabsProps> = ({
               key={tab.id}
               onClick={() => onChange(tab.id)}
               className={clsx(
-                "pb-2.5 text-xs font-semibold transition-all relative",
+                "pb-2 text-xs font-medium transition-all relative select-none",
                 isActive
-                  ? "text-accent border-b-2 border-accent"
-                  : "text-txt-secondary hover:text-txt-primary"
+                  ? "text-txt-primary font-semibold border-b-2 border-accent"
+                  : "text-txt-secondary hover:text-txt-primary",
               )}
             >
               <span>{tab.label}</span>
               {tab.count !== undefined && (
-                <span className={clsx(
-                  "ml-1.5 px-1.5 py-0.5 text-[10px] font-mono rounded-full",
-                  isActive ? "bg-accent/15 text-accent" : "bg-bg-tertiary text-txt-secondary"
-                )}>
+                <span
+                  className={clsx(
+                    "ml-1.5 px-1.5 py-0.2 text-[10px] font-mono rounded-xs",
+                    isActive
+                      ? "bg-accent/10 text-accent font-semibold"
+                      : "bg-bg-secondary text-txt-muted",
+                  )}
+                >
                   {tab.count}
                 </span>
               )}
@@ -55,7 +61,12 @@ export const Tabs: React.FC<TabsProps> = ({
   }
 
   return (
-    <div className={clsx("inline-flex bg-bg-tertiary p-1 rounded-lg border border-surface-border/60", className)}>
+    <div
+      className={clsx(
+        "inline-flex bg-bg-secondary p-0.5 rounded-sm border border-surface-border",
+        className,
+      )}
+    >
       {tabs.map((tab) => {
         const isActive = tab.id === activeTab;
         return (
@@ -63,18 +74,22 @@ export const Tabs: React.FC<TabsProps> = ({
             key={tab.id}
             onClick={() => onChange(tab.id)}
             className={clsx(
-              "px-3 py-1.5 text-xs font-semibold rounded-md transition-all duration-150 select-none",
+              "px-2.5 py-1 text-xs font-medium rounded-xs transition-colors duration-150 select-none focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-accent/40",
               isActive
-                ? "bg-surface text-txt-primary shadow-subtle font-bold"
-                : "text-txt-secondary hover:text-txt-primary"
+                ? "bg-surface text-txt-primary font-semibold border border-surface-border shadow-subtle"
+                : "text-txt-secondary hover:text-txt-primary border border-transparent",
             )}
           >
             <span>{tab.label}</span>
             {tab.count !== undefined && (
-              <span className={clsx(
-                "ml-1.5 px-1.5 py-0.5 text-[10px] font-mono rounded",
-                isActive ? "bg-accent/15 text-accent" : "bg-bg-primary text-txt-secondary"
-              )}>
+              <span
+                className={clsx(
+                  "ml-1.5 px-1.5 py-0.2 text-[10px] font-mono rounded-xs",
+                  isActive
+                    ? "bg-accent/10 text-accent font-semibold"
+                    : "bg-bg-primary text-txt-muted",
+                )}
+              >
                 {tab.count}
               </span>
             )}

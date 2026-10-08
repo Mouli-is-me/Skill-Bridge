@@ -1,21 +1,22 @@
-import React, { useState, useMemo } from 'react';
-import { useMachineStore } from '../store/machineStore';
-import { useUIStore } from '../store/uiStore';
-import { EventFilters } from '../components/events/EventFilters';
-import { EventTable } from '../components/events/EventTable';
-import { EventDetailDrawer } from '../components/events/EventDetailDrawer';
-import { Button } from '../components/ui/Button';
-import { Download } from 'lucide-react';
-import { downloadCSV } from '../utils/csvExport';
+import React, { useState, useMemo } from "react";
+import { useMachineStore } from "../store/machineStore";
+import { useUIStore } from "../store/uiStore";
+import { EventFilters } from "../components/events/EventFilters";
+import { EventTable } from "../components/events/EventTable";
+import { EventDetailDrawer } from "../components/events/EventDetailDrawer";
+import { Button } from "../components/ui/Button";
+import { Download } from "lucide-react";
+import { downloadCSV } from "../utils/csvExport";
 
 export const EventsPage: React.FC = () => {
   const { events, machines } = useMachineStore();
-  const { activeEventDrawerId, openEventDrawer, closeEventDrawer } = useUIStore();
+  const { activeEventDrawerId, openEventDrawer, closeEventDrawer } =
+    useUIStore();
 
-  const [searchQuery, setSearchQuery] = useState<string>('');
-  const [severityFilter, setSeverityFilter] = useState<string>('ALL');
-  const [machineFilter, setMachineFilter] = useState<string>('ALL');
-  const [typeFilter, setTypeFilter] = useState<string>('ALL');
+  const [searchQuery, setSearchQuery] = useState<string>("");
+  const [severityFilter, setSeverityFilter] = useState<string>("ALL");
+  const [machineFilter, setMachineFilter] = useState<string>("ALL");
+  const [typeFilter, setTypeFilter] = useState<string>("ALL");
 
   const filteredEvents = useMemo(() => {
     return events.filter((e) => {
@@ -24,19 +25,24 @@ export const EventsPage: React.FC = () => {
         e.machineId.toLowerCase().includes(searchQuery.toLowerCase()) ||
         e.type.toLowerCase().includes(searchQuery.toLowerCase());
 
-      const matchesSeverity = severityFilter === 'ALL' || e.severity === severityFilter;
-      const matchesMachine = machineFilter === 'ALL' || e.machineId === machineFilter;
-      const matchesType = typeFilter === 'ALL' || e.type === typeFilter;
+      const matchesSeverity =
+        severityFilter === "ALL" || e.severity === severityFilter;
+      const matchesMachine =
+        machineFilter === "ALL" || e.machineId === machineFilter;
+      const matchesType = typeFilter === "ALL" || e.type === typeFilter;
 
       return matchesSearch && matchesSeverity && matchesMachine && matchesType;
     });
   }, [events, searchQuery, severityFilter, machineFilter, typeFilter]);
 
-  const selectedEvent = events.find(e => e.id === activeEventDrawerId) || null;
-  const targetMachine = selectedEvent ? machines.find(m => m.id === selectedEvent.machineId) : undefined;
+  const selectedEvent =
+    events.find((e) => e.id === activeEventDrawerId) || null;
+  const targetMachine = selectedEvent
+    ? machines.find((m) => m.id === selectedEvent.machineId)
+    : undefined;
 
   const handleExportEventsCSV = () => {
-    const rows = filteredEvents.map(e => ({
+    const rows = filteredEvents.map((e) => ({
       EventID: e.id,
       Timestamp: e.timestamp,
       Severity: e.severity,
@@ -44,21 +50,23 @@ export const EventsPage: React.FC = () => {
       MachineName: e.machineName,
       Type: e.type,
       Message: e.message,
-      Value: e.value || '',
-      Threshold: e.threshold || ''
+      Value: e.value || "",
+      Threshold: e.threshold || "",
     }));
 
     downloadCSV(`skill_bridge_events_log.csv`, rows);
   };
 
   return (
-    <div className="space-y-6">
-      {/* Top Header & Export Action */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-surface border border-surface-border p-4 rounded-xl shadow-subtle">
+    <div className="space-y-4">
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-surface border border-surface-border p-3.5 rounded-md">
         <div>
-          <h2 className="text-xl font-extrabold text-txt-primary tracking-tight">System Event Audit Log</h2>
-          <p className="text-xs text-txt-secondary font-mono">
-            Full audit trail of operational warnings, errors, and threshold alarms
+          <h2 className="text-sm font-bold text-txt-primary tracking-tight font-mono">
+            EVENT AUDIT LOG
+          </h2>
+          <p className="text-[11px] text-txt-secondary font-mono">
+            Historical audit trail of telemetry warnings, errors, and system events
           </p>
         </div>
 
@@ -66,7 +74,7 @@ export const EventsPage: React.FC = () => {
           size="sm"
           variant="secondary"
           onClick={handleExportEventsCSV}
-          icon={<Download className="w-4 h-4" />}
+          icon={<Download className="w-3.5 h-3.5" />}
         >
           Export CSV
         </Button>
@@ -86,9 +94,11 @@ export const EventsPage: React.FC = () => {
       />
 
       {/* Audit Log Table */}
-      <div className="space-y-3">
-        <div className="flex items-center justify-between text-xs font-mono text-txt-muted">
-          <span>Showing {filteredEvents.length} of {events.length} total events</span>
+      <div className="space-y-2">
+        <div className="flex items-center justify-between text-[11px] font-mono text-txt-muted">
+          <span>
+            Showing {filteredEvents.length} of {events.length} total events
+          </span>
         </div>
 
         <EventTable
