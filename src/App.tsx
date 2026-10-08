@@ -13,6 +13,7 @@ import { AnalyticsPage } from "./pages/Analytics";
 import { ReportsPage } from "./pages/Reports";
 import { EventsPage } from "./pages/Events";
 import { useUIStore } from "./store/uiStore";
+import { initSupabaseDevTest } from "./services/supabaseTest";
 
 export const App: React.FC = () => {
   const theme = useUIStore((s) => s.theme);
@@ -36,6 +37,16 @@ export const App: React.FC = () => {
       document.documentElement.classList.add("light");
     }
   }, [theme]);
+
+  useEffect(() => {
+    let cleanup: (() => void) | undefined;
+    initSupabaseDevTest().then((cl) => {
+      cleanup = cl;
+    });
+    return () => {
+      if (cleanup) cleanup();
+    };
+  }, []);
 
   return (
     <BrowserRouter basename={basename}>

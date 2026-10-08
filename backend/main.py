@@ -58,21 +58,21 @@ class TelemetryPayload(BaseModel):
 latest_telemetry: Dict[str, Any] = {
     "machine_id": "M01",
     "device_id": "ESP32-M01",
-    "timestamp": time.time(),
-    "last_seen": time.time(),
-    "is_online": True,
+    "timestamp": None,
+    "last_seen": None,
+    "is_online": False,
     "machine": {
-        "state": "RUNNING",
-        "score": 98,
-        "status": "NORMAL"
+        "state": "OFFLINE",
+        "score": 0,
+        "status": "OFFLINE"
     },
     "mpu6050": {
-        "rms": 0.042,
-        "peak": 0.185,
-        "events": 2
+        "rms": 0.0,
+        "peak": 0.0,
+        "events": 0
     },
     "ds18b20": {
-        "temperature": 32.4
+        "temperature": 0.0
     },
     "digital_vibration": {
         "state": "QUIET"
@@ -99,13 +99,14 @@ async def check_offline_timeout():
     while True:
         await asyncio.sleep(2.0)
         now = time.time()
-        last_seen = latest_telemetry.get("last_seen", now)
+        last_seen = latest_telemetry.get("last_seen")
         timeout_seconds = 6.0
 
-        if now - last_seen > timeout_seconds and latest_telemetry.get("is_online", True):
+        if last_seen is not None and (now - last_seen > timeout_seconds) and latest_telemetry.get("is_online", False):
             latest_telemetry["is_online"] = False
+            latest_telemetry["machine"]["state"] = "OFFLINE"
             latest_telemetry["machine"]["status"] = "OFFLINE"
-            logger.warning("[M01] ESP32 timeout — Machine marked OFFLINE")
+            logger.warning("[M01] ESP32 OFFLINE — telemetry timeout")
             await broadcast_telemetry(latest_telemetry)
 
 @app.on_event("startup")
@@ -115,11 +116,27 @@ async def startup_event():
 
 @app.get("/")
 async def root():
+    last_seen = latest_telemetry.get("last_seen")
+    last_seen_sec = round(time.time() - last_seen, 1) if last_seen else None
     return {
         "system": "SKILL BRIDGE Real-Time Backend",
         "status": "ONLINE",
         "machine_m01_online": latest_telemetry.get("is_online", False),
-        "last_seen_seconds_ago": round(time.time() - latest_telemetry.get("last_seen", time.time()), 1)
+        "last_seen_seconds_ago": last_seen_sec
+    }
+
+@app.get("/api/machines/{machine_id}/status")
+async def get_machine_status(machine_id: str):
+    if machine_id.upper() not in ["M01", "M-01"]:
+        raise HTTPException(status_code=404, detail="Machine not found")
+    last_seen = latest_telemetry.get("last_seen")
+    last_seen_sec = round(time.time() - last_seen, 1) if last_seen else None
+    return {
+        "machine_id": "M01",
+        "device_id": "ESP32-M01",
+        "esp_online": latest_telemetry.get("is_online", False),
+        "last_seen": last_seen,
+        "last_seen_seconds_ago": last_seen_sec
     }
 
 @app.post("/api/machines/{machine_id}/data")
@@ -127,11 +144,11 @@ async def receive_machine_data(machine_id: str, payload: TelemetryPayload):
     """
     HTTP POST endpoint for ESP32 hardware to submit real-time JSON telemetry.
     """
-    if machine_id.upper() != "M01":
+    if machine_id.upper() not in ["M01", "M-01"]:
         raise HTTPException(status_code=400, detail="Currently only real hardware Machine M01 is configured.")
 
     now = time.time()
-    was_offline = not latest_telemetry.get("is_online", True)
+    was_offline = not latest_telemetry.get("is_online", False)
 
     payload_dict = payload.dict()
     payload_dict["timestamp"] = payload.timestamp or now
@@ -144,7 +161,7 @@ async def receive_machine_data(machine_id: str, payload: TelemetryPayload):
     latest_telemetry.update(payload_dict)
 
     if was_offline:
-        logger.info("[M01] Machine back online — ESP32 reconnected!")
+        logger.info("[M01] ESP32 ONLINE")
     else:
         logger.info(f"[M01] Telemetry received from {payload.device_id} | State: {payload.machine.state} | Temp: {payload.ds18b20.temperature}°C | RMS: {payload.mpu6050.rms}")
 
@@ -158,7 +175,7 @@ async def get_machine_data(machine_id: str):
     """
     HTTP GET endpoint to fetch current latest state for M01.
     """
-    if machine_id.upper() != "M01":
+    if machine_id.upper() not in ["M01", "M-01"]:
         raise HTTPException(status_code=404, detail="Machine not found")
     return latest_telemetry
 
@@ -185,3 +202,4 @@ async def websocket_endpoint(websocket: WebSocket, machine_id: str):
     except Exception as e:
         active_connections.discard(websocket)
         logger.error(f"[M01] WebSocket error: {e}")
+

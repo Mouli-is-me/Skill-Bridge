@@ -8,27 +8,27 @@ const RAW_INITIAL_MACHINES: Omit<Machine, 'modules'>[] = [
     type: 'Loom',
     location: 'Line A',
     section: 'Weaving Bay 1',
-    status: 'RUNNING',
+    status: 'OFFLINE',
     isHardware: true,
     hardwareState: {
-      espConnected: true,
-      backendConnected: true,
-      lastSeenSecondsAgo: 0
+      espConnected: false,
+      backendConnected: false,
+      lastSeenSecondsAgo: null
     },
     metrics: {
       rpm: 0,
-      temperature: 31.5,
-      vibration: 0.123,
+      temperature: 0,
+      vibration: 0,
       current: 0,
-      utilization: 100,
+      utilization: 0,
       production: 0,
-      oee: 92,
-      rmsVibration: 0.123,
-      peakVibration: 0.421,
-      vibrationEvents: 3,
+      oee: 0,
+      rmsVibration: 0,
+      peakVibration: 0,
+      vibrationEvents: 0,
       digitalVibrationState: 'QUIET',
-      machineState: 'RUNNING',
-      score: 92
+      machineState: 'OFFLINE',
+      score: 0
     },
     thresholds: {
       tempWarning: 75,
@@ -39,7 +39,7 @@ const RAW_INITIAL_MACHINES: Omit<Machine, 'modules'>[] = [
       rpmMax: 1100
     },
     lastUpdated: new Date().toISOString(),
-    isOnline: true,
+    isOnline: false,
     model: 'ESP32 Real Hardware Unit',
     installedDate: '2026-10-07'
   },

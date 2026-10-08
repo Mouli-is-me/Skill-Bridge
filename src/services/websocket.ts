@@ -59,6 +59,10 @@ class HardwareWebSocketService {
 
       this.ws.onopen = () => {
         this.backendConnected = true;
+        const { machines } = useMachineStore.getState();
+        const currentM01 = machines.find((m) => m.id === 'M-01' || m.id === 'M01');
+        const currentEspConnected = currentM01?.hardwareState?.espConnected ?? false;
+        this.updateHardwareState(currentEspConnected, true, currentM01?.hardwareState?.lastSeenSecondsAgo ?? null);
         useSimulationStore.getState().setConnectionStatus('LIVE');
         useSimulationStore.getState().updateSyncTime();
       };
@@ -74,12 +78,14 @@ class HardwareWebSocketService {
 
       this.ws.onclose = () => {
         this.backendConnected = false;
-        this.updateHardwareState(false, false, 999);
+        this.updateHardwareState(false, false, null);
+        useSimulationStore.getState().setConnectionStatus('CONNECTION_LOST');
         this.scheduleReconnect();
       };
 
       this.ws.onerror = () => {
         this.backendConnected = false;
+        this.updateHardwareState(false, false, null);
         this.ws?.close();
       };
     } catch (e) {
@@ -95,12 +101,14 @@ class HardwareWebSocketService {
     }, 3000);
   }
 
-  private updateHardwareState(espConnected: boolean, backendConnected: boolean, lastSeenSecondsAgo: number): void {
+  private updateHardwareState(espConnected: boolean, backendConnected: boolean, lastSeenSecondsAgo: number | null): void {
     const { machines, setMachines } = useMachineStore.getState();
     const updated = machines.map((m) => {
       if (m.id === 'M-01' || m.id === 'M01') {
         return {
           ...m,
+          isOnline: espConnected,
+          status: (espConnected ? (m.status === 'OFFLINE' ? ('RUNNING' as const) : m.status) : ('OFFLINE' as const)),
           hardwareState: {
             espConnected,
             backendConnected,

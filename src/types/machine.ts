@@ -33,7 +33,7 @@ export interface MachineMetrics {
 export interface HardwareConnectionState {
   espConnected: boolean;
   backendConnected: boolean;
-  lastSeenSecondsAgo: number;
+  lastSeenSecondsAgo: number | null;
 }
 
 export interface Machine {

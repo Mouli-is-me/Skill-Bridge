@@ -21,6 +21,7 @@ export function startSimulationEngine(intervalMs: number = 1500) {
     const isoTime = now.toISOString();
 
     machines.forEach((machine) => {
+      if (machine.id === 'M-01' || machine.id === 'M01' || machine.isHardware) return;
       if (!machine.isOnline) return;
 
       const m = machine.metrics;
