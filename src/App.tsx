@@ -14,6 +14,7 @@ import { ReportsPage } from "./pages/Reports";
 import { EventsPage } from "./pages/Events";
 import { useUIStore } from "./store/uiStore";
 import { initSupabaseDevTest } from "./services/supabaseTest";
+import { initSupabaseMachineSync } from "./services/supabaseMachines";
 
 export const App: React.FC = () => {
   const theme = useUIStore((s) => s.theme);
@@ -39,12 +40,20 @@ export const App: React.FC = () => {
   }, [theme]);
 
   useEffect(() => {
-    let cleanup: (() => void) | undefined;
+    let devCleanup: (() => void) | undefined;
+    let syncCleanup: (() => void) | undefined;
+
     initSupabaseDevTest().then((cl) => {
-      cleanup = cl;
+      devCleanup = cl;
     });
+
+    initSupabaseMachineSync().then((cl) => {
+      syncCleanup = cl;
+    });
+
     return () => {
-      if (cleanup) cleanup();
+      if (devCleanup) devCleanup();
+      if (syncCleanup) syncCleanup();
     };
   }, []);
 

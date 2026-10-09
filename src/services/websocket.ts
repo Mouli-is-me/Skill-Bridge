@@ -3,6 +3,7 @@ import { MachineModule, ModuleStatus } from '../types/module';
 import { MachineEvent } from '../types/event';
 import { useMachineStore } from '../store/machineStore';
 import { useSimulationStore } from '../store/simulationStore';
+import { isSupabaseConfigured } from '../lib/supabase';
 
 type TelemetryCallback = (machines: Machine[]) => void;
 type EventCallback = (event: MachineEvent) => void;
@@ -105,6 +106,16 @@ class HardwareWebSocketService {
     const { machines, setMachines } = useMachineStore.getState();
     const updated = machines.map((m) => {
       if (m.id === 'M-01' || m.id === 'M01') {
+        if (isSupabaseConfigured) {
+          return {
+            ...m,
+            hardwareState: {
+              espConnected: m.hardwareState?.espConnected ?? false,
+              backendConnected,
+              lastSeenSecondsAgo: m.hardwareState?.lastSeenSecondsAgo ?? null
+            }
+          };
+        }
         return {
           ...m,
           isOnline: espConnected,
@@ -122,6 +133,10 @@ class HardwareWebSocketService {
   }
 
   public handleIncomingTelemetry(payload: ESP32TelemetryPayload): void {
+    if (isSupabaseConfigured) {
+      // Supabase is the single source of truth for M01
+      return;
+    }
     const { machines, setMachines } = useMachineStore.getState();
     const nowIso = new Date().toISOString();
     const isOnline = payload.is_online ?? (payload.machine.status !== 'OFFLINE');
