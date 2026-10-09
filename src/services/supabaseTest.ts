@@ -1,4 +1,4 @@
-import { isSupabaseConfigured } from '../lib/supabase';
+import { isSupabaseConfigured, getSupabaseConfigDiagnostics } from '../lib/supabase';
 import { getMachine, getMachineTelemetry } from './supabaseMachines';
 import { subscribeToMachine, subscribeToTelemetry } from './supabaseRealtime';
 
@@ -14,9 +14,8 @@ export async function initSupabaseDevTest(): Promise<(() => void) | undefined> {
   }
 
   if (!isSupabaseConfigured) {
-    console.info(
-      '[Supabase Connection Diagnostic] VITE_SUPABASE_URL or VITE_SUPABASE_ANON_KEY not configured in .env.local. Standby mode.'
-    );
+    const diag = getSupabaseConfigDiagnostics();
+    console.info(`[Supabase Connection Diagnostic] Connection standby: ${diag.reason || 'Credentials incomplete.'}`);
     return;
   }
 

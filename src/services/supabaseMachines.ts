@@ -1,4 +1,4 @@
-import { supabase, isSupabaseConfigured } from '../lib/supabase';
+import { supabase, isSupabaseConfigured, getSupabaseConfigDiagnostics } from '../lib/supabase';
 import { Machine, MachineMetrics } from '../types/machine';
 import { useMachineStore } from '../store/machineStore';
 import { createDefaultModulesForMachine } from '../utils/moduleHelpers';
@@ -239,7 +239,8 @@ export function applySupabaseMachineRowToStore(row: SupabaseMachineRow): void {
  */
 export async function initSupabaseMachineSync(): Promise<() => void> {
   if (!isSupabaseConfigured) {
-    console.info('[SupabaseSync] Credentials not configured in .env.local — skipping live Supabase sync.');
+    const diag = getSupabaseConfigDiagnostics();
+    console.info(`[SupabaseSync] Live Supabase sync standby: ${diag.reason || 'Credentials missing or incomplete.'}`);
     return () => {};
   }
 
