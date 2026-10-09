@@ -6,6 +6,8 @@ import { subscribeToMachine, subscribeToTelemetry } from './supabaseRealtime';
  * Development-only test function to verify Supabase database connection
  * and realtime subscriptions for machine M01 without altering existing UI or logic.
  */
+let latestReceivedUpdateTimestamp: string | null = null;
+
 export async function initSupabaseDevTest(): Promise<(() => void) | undefined> {
   if (!import.meta.env.DEV) {
     return;
@@ -13,43 +15,61 @@ export async function initSupabaseDevTest(): Promise<(() => void) | undefined> {
 
   if (!isSupabaseConfigured) {
     console.info(
-      '[Supabase Dev Test] VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY are using placeholders or not configured in .env.local. Realtime testing standby.'
+      '[Supabase Connection Diagnostic] VITE_SUPABASE_URL or VITE_SUPABASE_ANON_KEY not configured in .env.local. Standby mode.'
     );
     return;
   }
 
-  console.log('[Supabase Dev Test] Initializing connection test for machine M01...');
+  console.group('[Supabase Connection Diagnostic]');
+  console.log('• Supabase Configuration:', 'ACTIVE');
 
-  // 1. Query M01 machine record
+  // 1. Initial Fetch Diagnostic
   const { data: machineData, error: machineError } = await getMachine('M01');
   if (machineError) {
-    console.warn('[Supabase Dev Test] M01 Query Result (Error):', machineError.message);
+    console.error('• Initial Fetch Status:', 'FAILED', `(Error: ${machineError.message})`);
+    console.log('• M01 Row Returned:', null);
   } else {
-    console.log('[Supabase Dev Test] M01 Query Result (Success):', machineData);
+    console.log('• Initial Fetch Status:', 'SUCCESS');
+    console.log('• M01 Row Returned:', machineData);
+    if (machineData?.updated_at || machineData?.last_seen) {
+      latestReceivedUpdateTimestamp = machineData.updated_at || machineData.last_seen || null;
+    }
   }
 
-  // 2. Query recent telemetry
+  // 2. Query Telemetry Diagnostic
   const { data: telemetryData, error: telemetryError } = await getMachineTelemetry('M01', 5);
   if (telemetryError) {
-    console.warn('[Supabase Dev Test] M01 Telemetry Query Result (Error):', telemetryError.message);
+    console.warn('• Telemetry Query Status:', 'FAILED', `(Error: ${telemetryError.message})`);
   } else {
-    console.log('[Supabase Dev Test] M01 Recent Telemetry (Success):', telemetryData);
+    console.log('• Telemetry Query Status:', 'SUCCESS', `(${telemetryData?.length || 0} rows)`);
   }
 
-  // 3. Subscribe to M01 Realtime Machine Updates
+  console.log('• Realtime Subscription Status:', 'LISTENING');
+  console.log('• Timestamp of Latest Received Update:', latestReceivedUpdateTimestamp || 'None yet');
+  console.groupEnd();
+
+  // 3. Subscribe to Realtime Updates
   const unsubscribeMachine = subscribeToMachine('M01', (updatedRow) => {
-    console.log('[Supabase Dev Test] Realtime M01 Machine Update Received:', updatedRow);
+    latestReceivedUpdateTimestamp = new Date().toISOString();
+    console.group('[Supabase Realtime Diagnostic Event]');
+    console.log('• Event Type:', 'UPDATE');
+    console.log('• Machine ID:', updatedRow.id);
+    console.log('• M01 Row Received:', updatedRow);
+    console.log('• Timestamp of Latest Update:', latestReceivedUpdateTimestamp);
+    console.groupEnd();
   });
 
-  // 4. Subscribe to M01 Realtime Telemetry Insertions
   const unsubscribeTelemetry = subscribeToTelemetry('M01', (newTelemetry) => {
-    console.log('[Supabase Dev Test] Realtime M01 Telemetry Inserted:', newTelemetry);
+    latestReceivedUpdateTimestamp = new Date().toISOString();
+    console.log('[Supabase Realtime Telemetry Event]', {
+      timestamp: latestReceivedUpdateTimestamp,
+      telemetry: newTelemetry
+    });
   });
 
-  // Return cleanup
   return () => {
     unsubscribeMachine();
     unsubscribeTelemetry();
-    console.log('[Supabase Dev Test] Cleaned up realtime subscriptions.');
+    console.log('[Supabase Connection Diagnostic] Cleaned up realtime subscriptions.');
   };
 }

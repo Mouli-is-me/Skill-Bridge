@@ -64,7 +64,7 @@ export function subscribeToMachine(
     return () => {};
   }
 
-  const cleanId = machineId.replace('-', '');
+  const cleanId = machineId.replace('-', '').toUpperCase();
   const channelName = `machine-realtime-${cleanId}`;
 
   const channel: RealtimeChannel = supabase
@@ -74,12 +74,15 @@ export function subscribeToMachine(
       {
         event: '*',
         schema: 'public',
-        table: 'machines',
-        filter: `id=eq.${machineId}`
+        table: 'machines'
       },
       (payload) => {
         if (payload.new) {
-          callback(payload.new as SupabaseMachineRow);
+          const row = payload.new as SupabaseMachineRow;
+          const rowCleanId = (row.id || '').replace('-', '').toUpperCase();
+          if (rowCleanId === cleanId) {
+            callback(row);
+          }
         }
       }
     )
