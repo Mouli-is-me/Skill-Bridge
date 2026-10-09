@@ -9,6 +9,20 @@ export default defineConfig(({ mode }) => ({
   plugins: [
     react(),
     {
+      name: "supabase-env-build-diagnostic",
+      buildStart() {
+        const url = process.env.VITE_SUPABASE_URL;
+        const key = process.env.VITE_SUPABASE_ANON_KEY;
+        const hasUrl = Boolean(url && url.trim() && !url.includes("YOUR_SUPABASE_PROJECT_URL"));
+        const hasKey = Boolean(key && key.trim() && !key.includes("YOUR_SUPABASE_ANON_KEY"));
+        console.log(`[build-diagnostic] Supabase VITE_SUPABASE_URL: ${hasUrl ? "PRESENT" : "MISSING"}`);
+        console.log(`[build-diagnostic] Supabase VITE_SUPABASE_ANON_KEY: ${hasKey ? "PRESENT" : "MISSING"}`);
+        if (!hasUrl || !hasKey) {
+          console.warn("[build-diagnostic] WARNING: Build environment missing Supabase credentials. Client will initialize in standby mode.");
+        }
+      },
+    },
+    {
       name: "generate-github-pages-404",
       closeBundle() {
         const distDir = path.resolve(__dirname, "dist");

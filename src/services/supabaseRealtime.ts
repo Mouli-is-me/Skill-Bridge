@@ -81,6 +81,9 @@ export function subscribeToMachine(
           const row = payload.new as SupabaseMachineRow;
           const rowCleanId = (row.id || '').replace('-', '').toUpperCase();
           if (rowCleanId === cleanId) {
+            if (import.meta.env.DEV) {
+              console.log(`[SupabaseRealtime] Realtime event on '${channelName}' (Event ID/Timestamp: ${payload.commit_timestamp || payload.eventType || 'UPDATE'}):`, row);
+            }
             callback(row);
           }
         }
@@ -92,9 +95,11 @@ export function subscribeToMachine(
         if (err) {
           console.error(`[SupabaseRealtime] Machine channel '${channelName}' error:`, err);
         }
-        if (status === 'CHANNEL_ERROR') {
+        if (status === 'SUBSCRIBED') {
+          console.log(`[SupabaseRealtime] Successfully subscribed to 'public.machines' realtime channel for ${machineId}`);
+        } else if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT' || status === 'CLOSED') {
           console.warn(
-            `[SupabaseRealtime] Channel error for machine ${machineId}. Please verify Supabase publication contains 'public.machines' and RLS permits read access.`
+            `[SupabaseRealtime] Channel status '${status}' for machine ${machineId}. Please verify Supabase publication includes 'public.machines' and RLS SELECT policy is enabled.`
           );
         }
       }
