@@ -25,8 +25,8 @@ export const App: React.FC = () => {
     rawBase !== "/"
       ? rawBase.replace(/\/$/, "")
       : window.location.pathname.startsWith("/Skill-Bridge")
-      ? "/Skill-Bridge"
-      : undefined;
+        ? "/Skill-Bridge"
+        : undefined;
 
   useEffect(() => {
     // Synchronize root theme class on startup
@@ -42,16 +42,26 @@ export const App: React.FC = () => {
   useEffect(() => {
     let devCleanup: (() => void) | undefined;
     let syncCleanup: (() => void) | undefined;
+    let disposed = false;
 
     initSupabaseDevTest().then((cl) => {
-      devCleanup = cl;
+      if (disposed) {
+        cl?.();
+      } else {
+        devCleanup = cl;
+      }
     });
 
     initSupabaseMachineSync().then((cl) => {
-      syncCleanup = cl;
+      if (disposed) {
+        cl();
+      } else {
+        syncCleanup = cl;
+      }
     });
 
     return () => {
+      disposed = true;
       if (devCleanup) devCleanup();
       if (syncCleanup) syncCleanup();
     };
