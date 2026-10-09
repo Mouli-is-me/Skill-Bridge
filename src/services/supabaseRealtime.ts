@@ -14,8 +14,9 @@ export function subscribeToAllMachines(
     return () => {};
   }
 
+  const channelName = 'all-machines-realtime';
   const channel: RealtimeChannel = supabase
-    .channel('all-machines-realtime')
+    .channel(channelName)
     .on(
       'postgres_changes',
       {
@@ -31,7 +32,19 @@ export function subscribeToAllMachines(
         });
       }
     )
-    .subscribe();
+    .subscribe((status, err) => {
+      if (import.meta.env.DEV) {
+        console.log(`[SupabaseRealtime] Channel '${channelName}' status:`, status);
+        if (err) {
+          console.error(`[SupabaseRealtime] Channel '${channelName}' subscription error:`, err);
+        }
+        if (status === 'CHANNEL_ERROR') {
+          console.warn(
+            `[SupabaseRealtime] Warning: Channel error on public.machines. Ensure 'public.machines' is added to the Supabase Realtime publication (supabase_realtime) and RLS SELECT policy is enabled.`
+          );
+        }
+      }
+    });
 
   return () => {
     supabase.removeChannel(channel);
@@ -51,8 +64,11 @@ export function subscribeToMachine(
     return () => {};
   }
 
+  const cleanId = machineId.replace('-', '');
+  const channelName = `machine-realtime-${cleanId}`;
+
   const channel: RealtimeChannel = supabase
-    .channel(`machine-realtime-${machineId}`)
+    .channel(channelName)
     .on(
       'postgres_changes',
       {
@@ -67,7 +83,19 @@ export function subscribeToMachine(
         }
       }
     )
-    .subscribe();
+    .subscribe((status, err) => {
+      if (import.meta.env.DEV) {
+        console.log(`[SupabaseRealtime] Machine channel '${channelName}' (${machineId}) status:`, status);
+        if (err) {
+          console.error(`[SupabaseRealtime] Machine channel '${channelName}' error:`, err);
+        }
+        if (status === 'CHANNEL_ERROR') {
+          console.warn(
+            `[SupabaseRealtime] Channel error for machine ${machineId}. Please verify Supabase publication contains 'public.machines' and RLS permits read access.`
+          );
+        }
+      }
+    });
 
   return () => {
     supabase.removeChannel(channel);
@@ -86,8 +114,11 @@ export function subscribeToTelemetry(
     return () => {};
   }
 
+  const cleanId = machineId.replace('-', '');
+  const channelName = `telemetry-realtime-${cleanId}`;
+
   const channel: RealtimeChannel = supabase
-    .channel(`telemetry-realtime-${machineId}`)
+    .channel(channelName)
     .on(
       'postgres_changes',
       {
@@ -102,7 +133,14 @@ export function subscribeToTelemetry(
         }
       }
     )
-    .subscribe();
+    .subscribe((status, err) => {
+      if (import.meta.env.DEV) {
+        console.log(`[SupabaseRealtime] Telemetry channel '${channelName}' status:`, status);
+        if (err) {
+          console.error(`[SupabaseRealtime] Telemetry channel '${channelName}' error:`, err);
+        }
+      }
+    });
 
   return () => {
     supabase.removeChannel(channel);

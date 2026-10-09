@@ -79,11 +79,13 @@ export async function getMachine(machineId: string): Promise<{ data: SupabaseMac
   }
 
   try {
+    const cleanId = machineId.replace('-', '');
     const { data, error } = await supabase
       .from('machines')
       .select('*')
-      .eq('id', machineId)
-      .single();
+      .or(`id.eq.${machineId},id.eq.${cleanId}`)
+      .limit(1)
+      .maybeSingle();
 
     if (error) {
       console.error(`[SupabaseMachines] Error fetching machine ${machineId}:`, error.message);

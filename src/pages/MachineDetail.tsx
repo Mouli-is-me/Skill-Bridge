@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useParams, useNavigate, Navigate } from 'react-router-dom';
 import { useMachineStore } from '../store/machineStore';
 import { MachineModuleCard } from '../components/machines/MachineModuleCard';
@@ -7,6 +7,7 @@ import { Badge } from '../components/ui/Badge';
 import { Button } from '../components/ui/Button';
 import { getMachineModuleStats } from '../utils/moduleHelpers';
 import { formatTimeAgo } from '../utils/formatting';
+import { getMachine, applySupabaseMachineRowToStore } from '../services/supabaseMachines';
 import { ArrowLeft, Layers } from 'lucide-react';
 
 export const MachineDetailPage: React.FC = () => {
@@ -17,6 +18,20 @@ export const MachineDetailPage: React.FC = () => {
   const paramClean = (machineId || '').replace('-', '').toUpperCase();
   const machine = machines.find((m) => m.id.replace('-', '').toUpperCase() === paramClean);
 
+  useEffect(() => {
+    if (paramClean === 'M01') {
+      getMachine('M01').then(({ data, error }) => {
+        if (data) {
+          applySupabaseMachineRowToStore(data);
+        } else {
+          getMachine('M-01').then(({ data: dataAlt }) => {
+            if (dataAlt) applySupabaseMachineRowToStore(dataAlt);
+          });
+        }
+      });
+    }
+  }, [paramClean]);
+
   if (!machine) {
     return <Navigate to="/machines" replace />;
   }
@@ -25,11 +40,8 @@ export const MachineDetailPage: React.FC = () => {
   const stats = getMachineModuleStats(modules);
   const history = historyMap[machine.id];
 
-  const isFault = stats.faults > 0;
-  const isWarning = stats.warnings > 0 && stats.faults === 0;
-  const isOffline = !machine.isOnline;
-  const statusLabel = isOffline ? 'OFFLINE' : isFault ? 'FAULT' : isWarning ? 'WARNING' : 'HEALTHY';
-
+  const isOffline = !machine.isOnline || machine.status === 'OFFLINE';
+  const statusLabel = isOffline ? 'OFFLINE' : (machine.status || 'RUNNING');
   const isHardwareMachine = machine.isHardware || machine.id.replace('-', '') === 'M01';
 
   return (
@@ -86,15 +98,15 @@ export const MachineDetailPage: React.FC = () => {
               <>
                 <div className="bg-bg-primary/50 px-2.5 py-1 rounded-xs border border-surface-border text-center">
                   <span className="text-[10px] text-txt-muted block uppercase">State</span>
-                  <span className="font-bold text-emerald-600 dark:text-emerald-400 text-xs">
-                    {machine.metrics.machineState || 'RUNNING'}
+                  <span className={`font-bold text-xs ${isOffline ? 'text-slate-400' : 'text-emerald-600 dark:text-emerald-400'}`}>
+                    {machine.metrics.machineState || (isOffline ? 'OFFLINE' : 'RUNNING')}
                   </span>
                 </div>
 
                 <div className="bg-bg-primary/50 px-2.5 py-1 rounded-xs border border-surface-border text-center">
                   <span className="text-[10px] text-txt-muted block uppercase">Score</span>
                   <span className="font-bold text-txt-primary text-xs">
-                    {machine.metrics.score ?? 95} / 100
+                    {typeof machine.metrics.score === 'number' ? machine.metrics.score : (isOffline ? 0 : 95)} / 100
                   </span>
                 </div>
               </>
